@@ -6,7 +6,16 @@
    - Clean text without leading symbols/emojis
    ===================================================== */
 
-const API_BASE = "http://127.0.0.1:5000";
+// If user configured a custom backend host via ?backend=... or in localStorage, use it.
+// Default to the same hostname serving the page on port 5000, or local 127.0.0.1:5000
+const urlParamHost = new URLSearchParams(window.location.search).get("backend");
+if (urlParamHost) {
+  localStorage.setItem("lifelink_backend_host", urlParamHost);
+}
+const savedBackend = localStorage.getItem("lifelink_backend_host");
+const currentHost = window.location.hostname && window.location.hostname !== "" ? window.location.hostname : "127.0.0.1";
+const API_BASE = savedBackend || (window.location.protocol.startsWith("http") ? `http://${currentHost}:5000` : "http://127.0.0.1:5000");
+
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
 const SESSION_KEY = "lifeline_session_v1";
 

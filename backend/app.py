@@ -318,5 +318,5 @@ if __name__ == "__main__":
         init_storage()
     except Exception as e:
         print(f"[Warning] Could not initialize DB storage: {e}")
-    print("Starting Blood Donor Finder backend on http://127.0.0.1:5000 ...")
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    print("Starting Blood Donor Finder backend on http://0.0.0.0:5000 (accessible locally and across team Wi-Fi) ...")
+    app.run(host="0.0.0.0", port=5000, debug=True)
