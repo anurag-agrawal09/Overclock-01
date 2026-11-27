@@ -322,6 +322,19 @@ function recenterMap() {
 }
 
 /**
+ * Fix Leaflet gray tiles when map container is shown after being hidden in a tab.
+ */
+function refreshMapSize() {
+  if (!mapInstance) return;
+  setTimeout(() => {
+    mapInstance.invalidateSize();
+    if (lastBounds && lastBounds.length > 0) {
+      mapInstance.fitBounds(lastBounds, { padding: [45, 45], maxZoom: 13 });
+    }
+  }, 120);
+}
+
+/**
  * Simple helper to prevent HTML injection in map popups.
  */
 function escapeHtml(text) {
