@@ -272,6 +272,41 @@ body {
   background: #e2e8f0;
 }
 
+.auth-action-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.auth-action-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-soft.full,
+.btn-outline-crimson.full {
+  width: 100%;
+  text-align: center;
+}
+
+.btn-outline-crimson {
+  background: #ffffff;
+  color: var(--crimson);
+  border: 1.5px solid var(--crimson);
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-outline-crimson:hover {
+  background: #fef2f2;
+}
+
 .quick-demo-row {
   display: grid;
   grid-template-columns: 1fr 1fr;

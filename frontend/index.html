@@ -39,15 +39,15 @@
         <h1>Every Drop Counts.<br />Save Lives Today.</h1>
         <div class="wave-divider">
           <span></span>
-          <span class="mini-drop">🩸</span>
+          <span class="mini-drop">+</span>
           <span></span>
         </div>
-        <p>Connect with verified blood donors in seconds when every heartbeat matters.</p>
+        <p>Connect verified blood donors and hospitals in seconds when every heartbeat matters.</p>
       </div>
 
       <div class="wave-footer-badges">
-        <span>⚡ Real-Time Matching</span>
-        <span>🛡️ 90-Day Safety Rule</span>
+        <span>Real-Time Matching</span>
+        <span>90-Day Safety Rule</span>
       </div>
     </div>
 
@@ -55,46 +55,43 @@
       <div class="auth-card narrow">
         <div class="role-toggle" role="tablist" aria-label="Account type">
           <button id="loginRoleUser" class="role-tab active" type="button" data-role="donor">
-            👥 User / Donor
+            User / Donor
           </button>
           <button id="loginRoleHospital" class="role-tab" type="button" data-role="hospital">
-            🏥 Hospital
+            Hospital
           </button>
         </div>
 
         <div class="auth-title-block">
           <h2>Welcome to LifeLink</h2>
-          <p id="loginSubtitle">Sign in to find eligible donors or respond to urgent requests</p>
+          <p id="loginSubtitle">Sign in to view emergencies or manage your donor profile</p>
         </div>
 
         <form id="loginForm" class="auth-inputs">
           <div class="pill-input">
-            <span class="input-icon">📱</span>
-            <input id="loginMobile" type="text" placeholder="Mobile Number or Email" required />
+            <input id="loginMobile" type="text" placeholder="Your Name, Mobile, or Email" required />
           </div>
 
           <div class="pill-input">
-            <span class="input-icon">🔒</span>
             <input id="loginPassword" type="password" placeholder="Password" required />
-            <button id="togglePassBtn" class="eye-btn" type="button" title="Show/Hide password">👁️</button>
+            <button id="togglePassBtn" class="eye-btn" type="button" title="Show/Hide password">Show</button>
           </div>
 
-          <button class="btn-crimson full lg" type="submit">Sign In to Dashboard →</button>
+          <button class="btn-crimson full lg" type="submit">Sign In to Dashboard</button>
         </form>
 
-        <div class="or-line"><span>OR</span></div>
+        <div class="or-line"><span>EXPLORE OR CREATE ACCOUNT</span></div>
 
-        <div class="quick-demo-row">
-          <button id="demoDonorBtn" class="btn-soft" type="button">🚀 Quick Demo: Donor View</button>
-          <button id="demoHospitalBtn" class="btn-soft" type="button">🏥 Quick Demo: Hospital View</button>
+        <div class="auth-action-columns">
+          <div class="auth-action-col">
+            <button id="demoDonorBtn" class="btn-soft full" type="button">Quick Demo: Donor View</button>
+            <button class="btn-outline-crimson full" type="button" onclick="showScreen('donor-register')">Register as Donor</button>
+          </div>
+          <div class="auth-action-col">
+            <button id="demoHospitalBtn" class="btn-soft full" type="button">Quick Demo: Hospital View</button>
+            <button class="btn-outline-crimson full" type="button" onclick="showScreen('hospital-register')">Register Hospital</button>
+          </div>
         </div>
-
-        <p class="auth-switch-links">
-          New here?
-          <button class="link-btn" type="button" onclick="showScreen('donor-register')">Register as Donor</button>
-          ·
-          <button class="link-btn" type="button" onclick="showScreen('hospital-register')">Register Hospital</button>
-        </p>
       </div>
     </div>
   </section>
@@ -116,22 +113,21 @@
         <h1>Be a Hero,<br />Donate Blood</h1>
         <div class="wave-divider">
           <span></span>
-          <span class="mini-drop">🩸</span>
+          <span class="mini-drop">+</span>
           <span></span>
         </div>
         <p>Your single donation can give a family another tomorrow.</p>
       </div>
 
-      <button class="btn-outline-white" type="button" onclick="showScreen('login')">← Back to Login</button>
+      <button class="btn-outline-white" type="button" onclick="showScreen('login')">Back to Login</button>
     </div>
 
     <div class="auth-form-panel wide-scroll">
       <div class="reg-sheet">
         <div class="reg-header">
-          <div class="reg-icon">🩸</div>
           <div>
             <h2>Donor Registration</h2>
-            <p>Join the LifeLink community — your profile saves lives nearby</p>
+            <p>Join the LifeLink community — your personal details are protected and visible only to verified hospitals</p>
           </div>
         </div>
 
@@ -139,7 +135,7 @@
           <div class="reg-two-col">
             <!-- 1. Personal Information -->
             <div class="reg-box">
-              <div class="reg-box-badge">👤 1. Personal Information</div>
+              <div class="reg-box-badge">1. Personal Information</div>
               <div class="reg-fields-grid">
                 <div class="f-group">
                   <label>Full Name *</label>
@@ -174,7 +170,7 @@
 
             <!-- 2. Blood Information -->
             <div class="reg-box">
-              <div class="reg-box-badge">🩸 2. Blood Information</div>
+              <div class="reg-box-badge">2. Blood Information</div>
               <div class="reg-fields-stack">
                 <div class="f-group">
                   <label>Blood Group *</label>
@@ -194,17 +190,9 @@
                   <label>Last Donation Date (for 90-day safety check)</label>
                   <input id="regDonorLastDate" type="date" />
                 </div>
-                <div class="f-group">
-                  <label>Donation Type</label>
-                  <select id="regDonorType">
-                    <option value="Whole Blood">Whole Blood</option>
-                    <option value="Platelets">Platelets</option>
-                    <option value="Plasma">Plasma</option>
-                  </select>
-                </div>
                 <label class="toggle-check">
                   <input id="regDonorVisible" type="checkbox" checked />
-                  <span>Show me in public donor search (Available to Donate)</span>
+                  <span>Available to donate (allow hospitals to contact me)</span>
                 </label>
               </div>
             </div>
@@ -213,7 +201,7 @@
           <div class="reg-two-col">
             <!-- 3. Address Information -->
             <div class="reg-box">
-              <div class="reg-box-badge">📍 3. Address &amp; Map Location</div>
+              <div class="reg-box-badge">3. Address Information</div>
               <div class="reg-fields-grid">
                 <div class="f-group">
                   <label>City *</label>
@@ -223,24 +211,16 @@
                   <label>Area / Locality *</label>
                   <input id="regDonorArea" type="text" placeholder="e.g. Hazratganj" required />
                 </div>
-                <div class="f-group">
+                <div class="f-group full-span">
                   <label>Pincode</label>
                   <input id="regDonorPin" type="text" placeholder="6-digit pincode" />
-                </div>
-                <div class="f-group">
-                  <label>GPS Coordinates (optional)</label>
-                  <div class="gps-inline">
-                    <input id="regDonorLat" type="number" step="any" placeholder="Lat" />
-                    <input id="regDonorLng" type="number" step="any" placeholder="Lng" />
-                    <button id="regDonorGpsBtn" class="btn-mini" type="button">📍 GPS</button>
-                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- 4. Health & Consent -->
+            <!-- 4. Health & Verification -->
             <div class="reg-box">
-              <div class="reg-box-badge">🩺 4. Health &amp; Verification</div>
+              <div class="reg-box-badge">4. Health &amp; Verification</div>
               <div class="reg-fields-grid">
                 <div class="f-group">
                   <label>Weight (kg)</label>
@@ -258,7 +238,7 @@
             </div>
           </div>
 
-          <button class="btn-crimson full lg" type="submit">👤+ Register as Donor &amp; Enter Dashboard</button>
+          <button class="btn-crimson full lg" type="submit">Register as Donor &amp; Enter Dashboard</button>
         </form>
       </div>
     </div>
@@ -281,22 +261,21 @@
         <h1>Register<br />Your Hospital</h1>
         <div class="wave-divider">
           <span></span>
-          <span class="mini-drop">✚</span>
+          <span class="mini-drop">+</span>
           <span></span>
         </div>
         <p>Together for a faster, healthier emergency response network.</p>
       </div>
 
-      <button class="btn-outline-white" type="button" onclick="showScreen('login')">← Back to Login</button>
+      <button class="btn-outline-white" type="button" onclick="showScreen('login')">Back to Login</button>
     </div>
 
     <div class="auth-form-panel wide-scroll">
       <div class="reg-sheet">
         <div class="reg-header">
-          <div class="reg-icon">🏥</div>
           <div>
             <h2>Hospital Registration</h2>
-            <p>Join LifeLink to broadcast emergency blood requests &amp; alert nearby donors</p>
+            <p>Join LifeLink to broadcast emergency blood requests &amp; find matching donors nearby</p>
           </div>
         </div>
 
@@ -348,7 +327,7 @@
             </div>
           </div>
 
-          <button class="btn-crimson full lg" type="submit">🏥 Register Hospital &amp; Open Portal</button>
+          <button class="btn-crimson full lg" type="submit">Register Hospital &amp; Open Portal</button>
         </form>
       </div>
     </div>
@@ -379,16 +358,10 @@
       </nav>
 
       <div class="sidebar-footer">
-        <button id="switchRoleBtn" class="sidebar-link" type="button">
-          <span>🔄</span>
-          <span id="switchRoleLabel">Switch to Hospital</span>
-        </button>
         <button id="logoutBtn" class="sidebar-link" type="button">
-          <span>🚪</span>
           <span>Logout</span>
         </button>
         <div class="sidebar-motto">
-          <span>🩸</span>
           <p id="sidebarMottoText">Be a Hero,<br />Donate Blood</p>
         </div>
       </div>
@@ -400,7 +373,7 @@
       <!-- TOP HEADER BAR -->
       <header class="workspace-top">
         <div class="top-left">
-          <button id="mobileMenuBtn" class="mobile-menu-btn" type="button" aria-label="Open menu">☰</button>
+          <button id="mobileMenuBtn" class="mobile-menu-btn" type="button" aria-label="Open menu">Menu</button>
           <div>
             <span class="top-kicker" id="topKicker">LifeLink Emergency Blood Network</span>
             <h2 class="top-page-title" id="topPageTitle">Dashboard</h2>
@@ -414,11 +387,10 @@
           </span>
 
           <button id="topBellBtn" class="bell-btn" type="button" title="View Live Alerts" onclick="navigateTab('notifications')">
-            🔔 <span id="bellCount" class="bell-badge">0</span>
+            Alerts <span id="bellCount" class="bell-badge">0</span>
           </button>
 
           <div class="user-chip" id="userChip">
-            <span id="userChipIcon">👤</span>
             <span id="userChipName">Guest Donor</span>
           </div>
         </div>
@@ -432,9 +404,8 @@
           <!-- Welcome Banner -->
           <div class="welcome-banner">
             <div class="welcome-left">
-              <div class="welcome-icon" id="welcomeBannerIcon">🩸</div>
               <div>
-                <h1 id="welcomeTitle">Welcome Back, Lifesaver!</h1>
+                <h1 id="welcomeTitle">Welcome Back!</h1>
                 <p id="welcomeSubtitle">Every second counts. Match eligible donors and respond to emergencies in real time.</p>
               </div>
             </div>
@@ -449,28 +420,24 @@
           <!-- 4 KPI STAT CARDS -->
           <div class="kpi-grid">
             <div class="kpi-card">
-              <div class="kpi-icon">🩸</div>
               <div>
                 <div class="kpi-val" id="kpiVal1">0</div>
-                <div class="kpi-lbl" id="kpiLbl1">Visible Eligible Donors</div>
+                <div class="kpi-lbl" id="kpiLbl1">Eligible Donors</div>
               </div>
             </div>
             <div class="kpi-card">
-              <div class="kpi-icon">💓</div>
               <div>
                 <div class="kpi-val" id="kpiVal2">0</div>
                 <div class="kpi-lbl" id="kpiLbl2">Active SOS Requests</div>
               </div>
             </div>
             <div class="kpi-card">
-              <div class="kpi-icon">🔔</div>
               <div>
                 <div class="kpi-val" id="kpiVal3">0</div>
                 <div class="kpi-lbl" id="kpiLbl3">Live Alerts Sent</div>
               </div>
             </div>
             <div class="kpi-card">
-              <div class="kpi-icon">🛡️</div>
               <div>
                 <div class="kpi-val" id="kpiVal4">90 Days</div>
                 <div class="kpi-lbl" id="kpiLbl4">Safe Rest Rule</div>
@@ -482,8 +449,8 @@
           <div class="two-col-panel">
             <div class="panel-card">
               <div class="panel-head">
-                <h3>📍 Nearby Emergency Requests</h3>
-                <button class="btn-pill-sm" type="button" onclick="navigateTab('requests')">View All →</button>
+                <h3>Nearby Emergency Requests</h3>
+                <button class="btn-pill-sm" type="button" onclick="navigateTab('requests')">View All</button>
               </div>
               <div id="dashRequestsList" class="panel-list">
                 <p class="empty-state">Loading emergency requests…</p>
@@ -492,10 +459,10 @@
 
             <div class="panel-card">
               <div class="panel-head">
-                <h3>🗺️ Nearby Donors &amp; Requests Map</h3>
+                <h3>Nearby Donors &amp; Requests Map</h3>
                 <div class="head-actions">
                   <button id="recenterMapBtn" class="btn-pill-ghost" type="button">Recenter</button>
-                  <button class="btn-pill-sm" type="button" onclick="navigateTab('map')">Full Map →</button>
+                  <button class="btn-pill-sm" type="button" onclick="navigateTab('map')">Full Map</button>
                 </div>
               </div>
               <div id="mapSlotDashboard">
@@ -508,8 +475,8 @@
           <div class="two-col-panel">
             <div class="panel-card">
               <div class="panel-head">
-                <h3 id="bottomTableTitle">📋 Recent Emergency Requests</h3>
-                <button class="btn-pill-sm" type="button" onclick="navigateTab('requests')">Manage →</button>
+                <h3 id="bottomTableTitle">Recent Emergency Requests</h3>
+                <button class="btn-pill-sm" type="button" onclick="navigateTab('requests')">Manage</button>
               </div>
               <div class="table-wrap">
                 <table class="clean-table">
@@ -528,37 +495,22 @@
 
             <div class="panel-card">
               <div class="panel-head">
-                <h3>⚡ Quick Actions</h3>
+                <h3>Quick Actions</h3>
               </div>
               <div class="quick-actions-grid" id="quickActionsGrid">
-                <button class="qa-tile" type="button" onclick="navigateTab('find-donors')">
-                  <span>🔍</span>
-                  <b>Find Donors</b>
-                </button>
-                <button class="qa-tile" type="button" onclick="navigateTab('create-request')">
-                  <span>🚨</span>
-                  <b>Post SOS</b>
-                </button>
-                <button class="qa-tile" type="button" onclick="navigateTab('notifications')">
-                  <span>🔔</span>
-                  <b>Check Alerts</b>
-                </button>
-                <button class="qa-tile" type="button" onclick="showScreen('donor-register')">
-                  <span>🩸</span>
-                  <b>Add Donor</b>
-                </button>
+                <!-- Populated by role in app.js -->
               </div>
             </div>
           </div>
         </section>
 
-        <!-- TAB: FIND DONORS -->
+        <!-- TAB: FIND DONORS (HOSPITAL ONLY - PROTECTED) -->
         <section id="tab-find-donors" class="tab-panel hidden">
           <div class="panel-card">
             <div class="panel-head">
               <div>
-                <h3>🔍 Find Eligible Blood Donors</h3>
-                <p class="panel-sub">Shows only donors who chose to be visible and passed the 90-day rest rule.</p>
+                <h3>Find Eligible Blood Donors Near Patient</h3>
+                <p class="panel-sub">Hospital-only protected directory: shows eligible donors who passed the 90-day rest rule.</p>
               </div>
               <button id="resetSearchBtn" class="btn-pill-ghost" type="button">Reset Filters</button>
             </div>
@@ -577,8 +529,8 @@
                 <option value="AB+">AB+</option>
                 <option value="AB-">AB-</option>
               </select>
-              <input id="searchArea" type="text" placeholder="Filter by city or area (e.g. Downtown, Hazratganj)" />
-              <button class="btn-crimson" type="submit">Search Donors</button>
+              <input id="searchArea" type="text" placeholder="Filter by patient area or city (e.g. Downtown, Hazratganj)" />
+              <button class="btn-crimson" type="submit">Search Nearby Donors</button>
             </form>
 
             <div id="donorsList" class="cards-grid"></div>
@@ -590,7 +542,7 @@
           <div class="panel-card narrow-center">
             <div class="panel-head">
               <div>
-                <h3>🚨 Post Emergency Blood Request</h3>
+                <h3>Post Emergency Blood Request</h3>
                 <p class="panel-sub">Broadcasting a request automatically alerts compatible eligible donors nearby.</p>
               </div>
             </div>
@@ -626,22 +578,13 @@
                 <input id="reqArea" type="text" placeholder="e.g. Hazratganj, Lucknow" required />
               </div>
 
-              <div class="f-group">
+              <div class="f-group full-span">
                 <label>Emergency Contact *</label>
                 <input id="reqContact" type="text" placeholder="e.g. Dr. Mehta +91 98111 22334" required />
               </div>
 
-              <div class="f-group">
-                <label>Map Coordinates (optional)</label>
-                <div class="gps-inline">
-                  <input id="reqLat" type="number" step="any" placeholder="Lat" />
-                  <input id="reqLng" type="number" step="any" placeholder="Lng" />
-                  <button id="reqGpsBtn" class="btn-mini" type="button">📍 GPS</button>
-                </div>
-              </div>
-
               <div class="f-group full-span">
-                <button class="btn-crimson full lg" type="submit">🚨 Broadcast Emergency Request &amp; Alert Donors</button>
+                <button class="btn-crimson full lg" type="submit">Broadcast Emergency Request &amp; Alert Donors</button>
               </div>
             </form>
           </div>
@@ -652,11 +595,11 @@
           <div class="panel-card">
             <div class="panel-head">
               <div>
-                <h3>📋 Emergency Blood Request Board</h3>
+                <h3>Emergency Blood Request Board</h3>
                 <p class="panel-sub">Copy a one-click WhatsApp SOS message or mark fulfilled requests as closed.</p>
               </div>
               <div class="head-actions">
-                <button id="refreshRequestsBtn" class="btn-pill-ghost" type="button">↻ Refresh</button>
+                <button id="refreshRequestsBtn" class="btn-pill-ghost" type="button">Refresh</button>
                 <button class="btn-pill-sm" type="button" onclick="navigateTab('create-request')">+ New SOS</button>
               </div>
             </div>
@@ -669,8 +612,8 @@
           <div class="panel-card">
             <div class="panel-head">
               <div>
-                <h3>🗺️ Full Live Donor &amp; Emergency Map</h3>
-                <p class="panel-sub">Green badges show eligible donors. Pulsing red badges show active SOS requests.</p>
+                <h3>Live Donors &amp; Emergency Map</h3>
+                <p class="panel-sub">Green pins show eligible donors near patient areas. Pulsing red pins show active SOS requests.</p>
               </div>
               <button class="btn-pill-sm" type="button" onclick="recenterMap()">Recenter Map</button>
             </div>
@@ -683,10 +626,10 @@
           <div class="panel-card">
             <div class="panel-head">
               <div>
-                <h3>🔔 Smart Compatibility Alerts</h3>
+                <h3>Smart Compatibility Alerts</h3>
                 <p class="panel-sub">Automatic notifications sent to exact and universal (O-) compatible donors.</p>
               </div>
-              <button id="refreshAlertsBtn" class="btn-pill-ghost" type="button">↻ Refresh</button>
+              <button id="refreshAlertsBtn" class="btn-pill-ghost" type="button">Refresh</button>
             </div>
             <div id="alertsList" class="panel-list"></div>
           </div>
@@ -696,7 +639,7 @@
         <section id="tab-profile" class="tab-panel hidden">
           <div class="panel-card narrow-center">
             <div class="panel-head">
-              <h3>👤 Account &amp; Network Info</h3>
+              <h3>Account &amp; Network Info</h3>
             </div>
             <div id="profileDetails" class="profile-summary"></div>
           </div>

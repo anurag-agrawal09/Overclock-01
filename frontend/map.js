@@ -208,7 +208,7 @@ function initMap() {
     mapOverlayEl = document.createElement("div");
     mapOverlayEl.className = "lifeline-map-hud";
     mapOverlayEl.innerHTML = `
-      <span id="hudCounts">🟢 0 Donors · 🔴 0 Requests</span>
+      <span id="hudCounts">0 Donors · 0 Active SOS</span>
       <span class="hud-sep">|</span>
       <span id="hudZoomHint" class="hud-hint">Click map to scroll-zoom</span>
     `;
@@ -236,8 +236,9 @@ function initMap() {
 
 /**
  * Clear old markers and draw fresh green donor + red request markers.
+ * Protects donor personal info unless isHospitalView is true.
  */
-function updateMapMarkers(donors, requests) {
+function updateMapMarkers(donors, requests, isHospitalView = false) {
   if (!mapInstance || !donorLayer || !requestLayer) return;
 
   donorLayer.clearLayers();
@@ -256,12 +257,19 @@ function updateMapMarkers(donors, requests) {
 
     const icon = createBloodPinIcon("donor", donor.blood_group);
     const marker = L.marker([lat, lng], { icon });
+
+    const popupDetails = isHospitalView
+      ? `<strong>${escapeHtml(donor.name || "Donor")}</strong><br/>
+         Area: ${escapeHtml(donor.area || "N/A")}<br/>
+         Contact: ${escapeHtml(donor.contact_preference || "N/A")}`
+      : `<strong>Verified Eligible Donor</strong><br/>
+         Area: ${escapeHtml(donor.area || "N/A")}<br/>
+         Contact: <em>Protected (Hospital Access Only)</em>`;
+
     marker.bindPopup(`
       <div class="lifeline-popup">
         <span class="lifeline-popup-badge donor">DONOR · ${escapeHtml(donor.blood_group || "N/A")}</span><br/>
-        <strong>${escapeHtml(donor.name || "Donor")}</strong><br/>
-        Area: ${escapeHtml(donor.area || "N/A")}<br/>
-        Contact: ${escapeHtml(donor.contact_preference || "N/A")}
+        ${popupDetails}
       </div>
     `);
     marker.addTo(donorLayer);
@@ -298,7 +306,7 @@ function updateMapMarkers(donors, requests) {
   // Update floating HUD counts
   const hudCounts = document.getElementById("hudCounts");
   if (hudCounts) {
-    hudCounts.textContent = `🟢 ${donorPinCount} Donors · 🔴 ${requestPinCount} Active SOS`;
+    hudCounts.textContent = `${donorPinCount} Donors · ${requestPinCount} Active SOS`;
   }
 
   lastBounds = bounds.length > 0 ? bounds : null;

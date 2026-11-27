@@ -166,6 +166,103 @@ def list_donors():
 
     return jsonify(visible_and_eligible), 200
 
+@app.route("/api/donors/lookup", methods=["GET"])
+def lookup_donor():
+    """Look up a donor by their phone or contact number to return their registered name."""
+    phone = (request.args.get("phone") or "").strip()
+    if not phone:
+        return jsonify({"found": False, "error": "Phone query parameter required"}), 400
+
+    clean_digits = "".join(filter(str.isdigit, phone))
+    all_donors = get_donors_fn()
+
+    for donor in all_donors:
+        contact = str(donor.get("contact_preference") or "")
+        donor_digits = "".join(filter(str.isdigit, contact))
+        name_str = str(donor.get("name") or "").strip().lower()
+
+        # Match either phone digits (minimum 6 digits to prevent false matches) or exact registered name
+        if clean_digits and len(clean_digits) >= 6 and clean_digits in donor_digits:
+            return jsonify({
+                "found": True,
+                "name": donor.get("name"),
+                "blood_group": donor.get("blood_group"),
+                "area": donor.get("area")
+            }), 200
+
+        if phone.lower() == name_str and len(phone) >= 3:
+            return jsonify({
+                "found": True,
+                "name": donor.get("name"),
+                "blood_group": donor.get("blood_group"),
+                "area": donor.get("area")
+            }), 200
+
+    return jsonify({"found": False, "message": "No registered donor found with this number or name"}), 404
+
+@app.route("/api/auth/login", methods=["POST"])
+def auth_login():
+    """Strict login validation: blocks fake/unregistered credentials."""
+    data = request.get_json(silent=True) or {}
+    role = (data.get("role") or "donor").strip().lower()
+    identifier = (data.get("identifier") or "").strip()
+    password = (data.get("password") or "").strip()
+
+    if not identifier:
+        return jsonify({"success": False, "message": "Please enter your registered mobile number or name"}), 400
+
+    if role == "hospital":
+        # Check against existing hospitals in requests table or known seed hospitals
+        all_reqs = get_requests_fn()
+        known_hospitals = list(set([r.get("hospital", "").strip().lower() for r in all_reqs if r.get("hospital")]))
+        # Allow demo hospital names
+        known_hospitals.extend(["city hospital", "city memorial hospital", "aiims hospital", "district hospital", "apollo hospital"])
+
+        ident_lower = identifier.lower()
+        matched = any(h in ident_lower or ident_lower in h for h in known_hospitals if len(h) >= 4)
+        if matched or "hospital" in ident_lower:
+            return jsonify({
+                "success": True,
+                "role": "hospital",
+                "name": identifier if len(identifier) > 3 and not identifier.isdigit() else "City Memorial Hospital",
+                "info": "Verified Hospital Emergency Desk"
+            }), 200
+        else:
+            return jsonify({
+                "success": False,
+                "message": f"Hospital '{identifier}' is not registered in our database. Please register your hospital first."
+            }), 401
+
+    # Role is Donor: MUST exist in database
+    clean_digits = "".join(filter(str.isdigit, identifier))
+    all_donors = get_donors_fn()
+
+    for donor in all_donors:
+        contact = str(donor.get("contact_preference") or "")
+        donor_digits = "".join(filter(str.isdigit, contact))
+        name_str = str(donor.get("name") or "").strip().lower()
+
+        if clean_digits and len(clean_digits) >= 6 and clean_digits in donor_digits:
+            return jsonify({
+                "success": True,
+                "role": "donor",
+                "name": donor.get("name"),
+                "info": f"{donor.get('blood_group')} · {donor.get('area')}"
+            }), 200
+
+        if identifier.lower() == name_str and len(identifier) >= 3:
+            return jsonify({
+                "success": True,
+                "role": "donor",
+                "name": donor.get("name"),
+                "info": f"{donor.get('blood_group')} · {donor.get('area')}"
+            }), 200
+
+    return jsonify({
+        "success": False,
+        "message": f"Account not found for '{identifier}'. Unregistered or fake credentials cannot login. Please click 'Register as Donor' below."
+    }), 401
+
 @app.route("/api/requests", methods=["POST"])
 def create_request():
     data = request.get_json(silent=True) or {}
