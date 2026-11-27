@@ -142,8 +142,9 @@
                   <input id="regDonorName" type="text" placeholder="e.g. Aarav Sharma" required />
                 </div>
                 <div class="f-group">
-                  <label>Date of Birth</label>
-                  <input id="regDonorDob" type="date" />
+                  <label>Date of Birth (Age 18–65 only) *</label>
+                  <input id="regDonorDob" type="date" required />
+                  <small id="regDonorAgeNotice" style="color: #64748b; font-size: 0.78rem; display: block; margin-top: 3px;"></small>
                 </div>
                 <div class="f-group">
                   <label>Gender</label>
@@ -155,15 +156,15 @@
                 </div>
                 <div class="f-group">
                   <label>Mobile Number *</label>
-                  <input id="regDonorContact" type="text" placeholder="+91 98765 43210" required />
+                  <input id="regDonorContact" type="tel" placeholder="+91 98765 43210" required />
                 </div>
                 <div class="f-group">
                   <label>Email Address</label>
                   <input id="regDonorEmail" type="email" placeholder="donor@email.com" />
                 </div>
                 <div class="f-group">
-                  <label>Account Password</label>
-                  <input id="regDonorPass" type="password" placeholder="Create password" />
+                  <label>Account Password (to protect your data) *</label>
+                  <input id="regDonorPass" type="password" placeholder="Create a secure password" minlength="4" required />
                 </div>
               </div>
             </div>
@@ -187,8 +188,12 @@
                   </select>
                 </div>
                 <div class="f-group">
-                  <label>Last Donation Date (for 90-day safety check)</label>
-                  <input id="regDonorLastDate" type="date" />
+                  <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                    <label>Last Donation Date *</label>
+                    <button type="button" id="btnFirstTimeDonor" style="font-size: 0.75rem; background: none; border: none; color: #b91c1c; cursor: pointer; text-decoration: underline; padding: 0;">Never Donated (First Time)</button>
+                  </div>
+                  <input id="regDonorLastDate" type="date" required />
+                  <small style="color: #64748b; font-size: 0.78rem;">Mandatory for 90-day medical rest rule &amp; donor eligibility.</small>
                 </div>
                 <label class="toggle-check">
                   <input id="regDonorVisible" type="checkbox" checked />
@@ -212,8 +217,8 @@
                   <input id="regDonorArea" type="text" placeholder="e.g. Hazratganj" required />
                 </div>
                 <div class="f-group full-span">
-                  <label>Pincode</label>
-                  <input id="regDonorPin" type="text" placeholder="6-digit pincode" />
+                  <label>Pincode (6 digits) *</label>
+                  <input id="regDonorPin" type="text" placeholder="6-digit pincode (e.g. 226001)" pattern="[0-9]{6}" maxlength="6" required />
                 </div>
               </div>
             </div>
@@ -223,8 +228,8 @@
               <div class="reg-box-badge">4. Health &amp; Verification</div>
               <div class="reg-fields-grid">
                 <div class="f-group">
-                  <label>Weight (kg)</label>
-                  <input id="regDonorWeight" type="number" placeholder="e.g. 62" />
+                  <label>Weight (kg, min 50 kg) *</label>
+                  <input id="regDonorWeight" type="number" placeholder="e.g. 62" min="50" max="150" required />
                 </div>
                 <div class="f-group">
                   <label>Recent Illness</label>
@@ -233,6 +238,15 @@
                 <div class="f-group full-span">
                   <label>Blood Test / Verification Report (optional)</label>
                   <input id="regDonorReport" type="file" accept=".pdf,.jpg,.jpeg,.png" />
+                </div>
+                <div class="f-group full-span" style="background: #fff5f5; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; margin-top: 6px;">
+                  <label class="toggle-check" style="align-items: flex-start; gap: 8px; cursor: pointer;">
+                    <input id="regDonorHealthVerified" type="checkbox" required />
+                    <span style="font-size: 0.82rem; line-height: 1.35; color: #1e293b;">
+                      <strong style="color: #991b1b;">Mandatory Health Verification *</strong><br />
+                      I confirm I weigh &ge; 50 kg, have no communicable/blood-borne diseases (HIV, Hepatitis, Malaria), have no serious chronic cardiac/pulmonary ailments, and am medically fit to donate blood.
+                    </span>
+                  </label>
                 </div>
               </div>
             </div>

@@ -10,6 +10,11 @@ CREATE TABLE IF NOT EXISTS donors (
     is_visible INTEGER DEFAULT 1,
     latitude REAL,
     longitude REAL,
+    dob TEXT,
+    pincode TEXT,
+    password TEXT,
+    weight REAL,
+    health_verified INTEGER DEFAULT 1,
     created_at TEXT
 );
 

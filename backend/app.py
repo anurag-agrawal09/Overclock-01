@@ -130,6 +130,38 @@ def register_donor():
         if not data.get(field):
             return jsonify({"error": f"Missing required field: {field}"}), 400
 
+    # 1. Date of Birth & Age validation (18 to 65 compulsory rule)
+    dob = (data.get("dob") or "").strip()
+    if dob:
+        try:
+            dob_date = datetime.strptime(dob, "%Y-%m-%d").date()
+            today = datetime.now().date()
+            age = today.year - dob_date.year - ((today.month, today.day) < (dob_date.month, dob_date.day))
+            if age < 18:
+                return jsonify({"error": f"Age restriction: Donor must be at least 18 years old to donate blood (calculated age: {age} years)."}), 400
+            if age > 65:
+                return jsonify({"error": f"Age restriction: Donor must be 65 years old or younger (calculated age: {age} years)."}), 400
+        except ValueError:
+            return jsonify({"error": "Invalid Date of Birth format. Please select a valid date."}), 400
+
+    # 2. Pincode validation (6 digits)
+    pincode = (str(data.get("pincode") or "")).strip()
+    if pincode and (not pincode.isdigit() or len(pincode) != 6):
+        return jsonify({"error": "Pincode must be a valid 6-digit postal code."}), 400
+
+    # 3. Health & Weight verification
+    weight = data.get("weight")
+    if weight is not None and str(weight).strip() != "":
+        try:
+            w_val = float(weight)
+            if w_val < 50.0:
+                return jsonify({"error": "Donor weight must be at least 50 kg for blood donation safety."}), 400
+        except ValueError:
+            pass
+
+    health_verified = 1 if data.get("health_verified", True) in [True, 1, "1", "true", "True"] else 0
+    password = str(data.get("password") or "").strip()
+
     new_donor = {
         "name": str(data["name"]).strip(),
         "blood_group": str(data["blood_group"]).strip().upper(),
@@ -138,7 +170,12 @@ def register_donor():
         "last_donation_date": (data.get("last_donation_date") or "").strip(),
         "is_visible": 1 if data.get("is_visible", True) in [True, 1, "1", "true", "True"] else 0,
         "latitude": data.get("latitude"),
-        "longitude": data.get("longitude")
+        "longitude": data.get("longitude"),
+        "dob": dob,
+        "pincode": pincode,
+        "password": password,
+        "weight": weight,
+        "health_verified": health_verified
     }
     saved = add_donor_fn(new_donor)
     return jsonify(saved), 201
@@ -243,6 +280,12 @@ def auth_login():
         name_str = str(donor.get("name") or "").strip().lower()
 
         if clean_digits and len(clean_digits) >= 6 and clean_digits in donor_digits:
+            donor_pass = str(donor.get("password") or "").strip()
+            if donor_pass and password and password != donor_pass:
+                return jsonify({
+                    "success": False,
+                    "message": "Incorrect password. Please verify your credentials."
+                }), 401
             return jsonify({
                 "success": True,
                 "role": "donor",
@@ -251,6 +294,12 @@ def auth_login():
             }), 200
 
         if identifier.lower() == name_str and len(identifier) >= 3:
+            donor_pass = str(donor.get("password") or "").strip()
+            if donor_pass and password and password != donor_pass:
+                return jsonify({
+                    "success": False,
+                    "message": "Incorrect password. Please verify your credentials."
+                }), 401
             return jsonify({
                 "success": True,
                 "role": "donor",

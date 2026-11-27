@@ -20,12 +20,24 @@ def _now_iso():
 
 
 def init_db():
-    """Initialize database tables from schema.sql if they do not exist."""
+    """Initialize database tables from schema.sql if they do not exist, and migrate columns."""
     with open(SCHEMA_PATH, "r", encoding="utf-8") as f:
         schema_sql = f.read()
 
     with _get_connection() as conn:
         conn.executescript(schema_sql)
+        # Check and add columns if upgrading existing db
+        existing_cols = [c[1] for c in conn.execute("PRAGMA table_info(donors)").fetchall()]
+        migrations = [
+            ("dob", "dob TEXT"),
+            ("pincode", "pincode TEXT"),
+            ("password", "password TEXT"),
+            ("weight", "weight REAL"),
+            ("health_verified", "health_verified INTEGER DEFAULT 1")
+        ]
+        for col_name, col_def in migrations:
+            if col_name not in existing_cols:
+                conn.execute(f"ALTER TABLE donors ADD COLUMN {col_def}")
 
 
 def add_donor(data):
@@ -38,9 +50,10 @@ def add_donor(data):
             """
             INSERT INTO donors (
                 name, blood_group, area, contact_preference,
-                last_donation_date, is_visible, latitude, longitude, created_at
+                last_donation_date, is_visible, latitude, longitude,
+                dob, pincode, password, weight, health_verified, created_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 data["name"],
@@ -51,6 +64,11 @@ def add_donor(data):
                 is_visible,
                 data.get("latitude"),
                 data.get("longitude"),
+                data.get("dob"),
+                data.get("pincode"),
+                data.get("password"),
+                data.get("weight"),
+                1 if data.get("health_verified", True) in [True, 1, "1", "true", "True"] else 0,
                 created_at,
             ),
         )
@@ -66,6 +84,11 @@ def add_donor(data):
         "is_visible": is_visible,
         "latitude": data.get("latitude"),
         "longitude": data.get("longitude"),
+        "dob": data.get("dob"),
+        "pincode": data.get("pincode"),
+        "password": data.get("password"),
+        "weight": data.get("weight"),
+        "health_verified": 1 if data.get("health_verified", True) in [True, 1, "1", "true", "True"] else 0,
         "created_at": created_at,
     }
 

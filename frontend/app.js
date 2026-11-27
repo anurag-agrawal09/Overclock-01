@@ -65,6 +65,19 @@ const CAN_DONATE_TO = {
   "AB+": ["AB+"]
 };
 
+function calculateAge(dobString) {
+  if (!dobString) return 0;
+  const birth = new Date(dobString);
+  if (isNaN(birth.getTime())) return 0;
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age;
+}
+
 let filterMatchingOnly = false;
 
 function inferCoordsFromArea(areaText) {
@@ -854,24 +867,124 @@ document.addEventListener("DOMContentLoaded", () => {
     showScreen("app", "dashboard");
   });
 
+  // Real-time Age feedback and "First Time Donor" helper
+  const dobInput = document.getElementById("regDonorDob");
+  const ageNotice = document.getElementById("regDonorAgeNotice");
+  if (dobInput && ageNotice) {
+    dobInput.addEventListener("input", () => {
+      if (!dobInput.value) {
+        ageNotice.textContent = "";
+        return;
+      }
+      const age = calculateAge(dobInput.value);
+      if (age < 18) {
+        ageNotice.style.color = "#dc2626";
+        ageNotice.textContent = `Age: ${age} yrs (Underage — Minimum 18 years required)`;
+      } else if (age > 65) {
+        ageNotice.style.color = "#dc2626";
+        ageNotice.textContent = `Age: ${age} yrs (Above limit — Maximum 65 years allowed)`;
+      } else {
+        ageNotice.style.color = "#16a34a";
+        ageNotice.textContent = `Age: ${age} yrs (Eligible to donate)`;
+      }
+    });
+  }
+
+  const btnFirstTime = document.getElementById("btnFirstTimeDonor");
+  if (btnFirstTime) {
+    btnFirstTime.addEventListener("click", () => {
+      const d = new Date();
+      d.setDate(d.getDate() - 100); // 100 days ago, satisfies 90-day rest rule
+      document.getElementById("regDonorLastDate").value = d.toISOString().split("T")[0];
+      showToast("First time donor date auto-filled (eligible to donate immediately).");
+    });
+  }
+
   // Donor Registration -> POST /api/donors
   document.getElementById("donorRegForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const donorName = document.getElementById("regDonorName").value.trim();
+    const dob = document.getElementById("regDonorDob").value;
+    const password = document.getElementById("regDonorPass").value.trim();
+    const contact = document.getElementById("regDonorContact").value.trim();
+    const bloodGroup = document.getElementById("regDonorBlood").value;
+    const lastDonation = document.getElementById("regDonorLastDate").value;
     const city = document.getElementById("regDonorCity").value.trim();
     const area = document.getElementById("regDonorArea").value.trim();
+    const pincode = document.getElementById("regDonorPin").value.trim();
+    const weightVal = parseFloat(document.getElementById("regDonorWeight").value);
+    const healthVerified = document.getElementById("regDonorHealthVerified").checked;
+
+    // 1. Mandatory DOB & Age 18 to 65 check
+    if (!dob) {
+      alert("Registration Error:\nDate of Birth is compulsory to verify blood donor eligibility.");
+      showToast("Date of birth is compulsory.");
+      return;
+    }
+    const age = calculateAge(dob);
+    if (age < 18) {
+      alert(`Registration Blocked:\nYou are ${age} years old. Donors must be at least 18 years old to donate blood.`);
+      showToast("Underage: Minimum 18 years required.");
+      return;
+    }
+    if (age > 65) {
+      alert(`Registration Blocked:\nYou are ${age} years old. Donors must be 65 years old or younger according to blood donation regulations.`);
+      showToast("Maximum age limit is 65 years.");
+      return;
+    }
+
+    // 2. Mandatory Password check
+    if (!password || password.length < 4) {
+      alert("Registration Error:\nPassword is required to protect your personal account (minimum 4 characters).");
+      showToast("Password is required.");
+      return;
+    }
+
+    // 3. Mandatory Pincode check
+    if (!pincode || !/^\d{6}$/.test(pincode)) {
+      alert("Registration Error:\nPlease enter a valid 6-digit Pincode.");
+      showToast("Pincode must be 6 digits.");
+      return;
+    }
+
+    // 4. Mandatory Health Verification
+    if (!healthVerified) {
+      alert("Registration Error:\nHealth verification declaration is compulsory. You must confirm that you meet medical criteria to register.");
+      showToast("Health verification is compulsory.");
+      return;
+    }
+
+    // 5. Mandatory Weight Check (min 50 kg)
+    if (isNaN(weightVal) || weightVal < 50) {
+      alert("Registration Error:\nDonor weight must be at least 50 kg for blood donation safety.");
+      showToast("Minimum weight is 50 kg.");
+      return;
+    }
+
+    // 6. Mandatory Last Donation Date Check
+    if (!lastDonation) {
+      alert("Registration Error:\nLast donation date is compulsory for the 90-day medical rest check.\n\nIf you have never donated before, click 'Never Donated (First Time)'.");
+      showToast("Last donation date is required.");
+      return;
+    }
+
     const fullArea = city ? `${area}, ${city}` : area;
     const coords = inferCoordsFromArea(fullArea);
 
     const payload = {
       name: donorName,
-      blood_group: document.getElementById("regDonorBlood").value,
+      blood_group: bloodGroup,
       area: fullArea,
-      contact_preference: document.getElementById("regDonorContact").value.trim(),
-      last_donation_date: document.getElementById("regDonorLastDate").value || "",
+      contact_preference: contact,
+      last_donation_date: lastDonation,
       is_visible: document.getElementById("regDonorVisible").checked,
       latitude: coords.latitude,
-      longitude: coords.longitude
+      longitude: coords.longitude,
+      dob: dob,
+      pincode: pincode,
+      password: password,
+      weight: weightVal,
+      health_verified: healthVerified
     };
 
     try {
@@ -880,17 +993,24 @@ document.addEventListener("DOMContentLoaded", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || `Server responded with ${res.status}`);
+      }
 
       currentRole = "donor";
-      currentUser = { name: donorName, info: `${payload.blood_group} · ${payload.area}` };
-      showToast(`Welcome ${donorName}! Your donor profile is saved.`);
+      currentUser = {
+        name: donorName,
+        info: `${payload.blood_group} · ${payload.area}`
+      };
+      showToast(`Welcome ${donorName}! Your protected donor profile is created.`);
       e.target.reset();
       document.getElementById("regDonorVisible").checked = true;
       showScreen("app", "dashboard");
     } catch (err) {
       console.error(err);
-      showToast("Could not register donor. Make sure backend is running.");
+      alert(`Registration Failed:\n\n${err.message}`);
+      showToast(err.message || "Could not register donor.");
     }
   });
 
