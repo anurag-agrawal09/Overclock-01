@@ -206,7 +206,10 @@ def close_request(req_id):
     closed = close_request_fn(req_id)
     if not closed:
         return jsonify({"error": f"Request with id {req_id} not found"}), 404
-    return jsonify(closed), 200
+    # If the database function returns a dict, return it; if it returns True, return a clean dict
+    if isinstance(closed, dict):
+        return jsonify(closed), 200
+    return jsonify({"id": req_id, "status": "CLOSED"}), 200
 
 @app.route("/api/alerts", methods=["GET"])
 def list_alerts():
