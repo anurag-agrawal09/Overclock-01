@@ -308,6 +308,33 @@ def close_request(req_id):
         return jsonify(closed), 200
     return jsonify({"id": req_id, "status": "CLOSED"}), 200
 
+@app.route("/api/requests/<int:req_id>/respond", methods=["POST"])
+def respond_ready_to_donate(req_id):
+    """
+    Called when a donor clicks 'I Am Ready to Donate'.
+    Creates a direct notification for the requester/patient.
+    """
+    data = request.get_json(silent=True) or {}
+    donor_name = (data.get("donor_name") or "Volunteer Donor").strip()
+    donor_blood = (data.get("donor_blood") or "").strip()
+    donor_contact = (data.get("donor_contact") or "").strip()
+
+    all_reqs = get_requests_fn()
+    target_req = next((r for r in all_reqs if r.get("id") == req_id), None)
+    hospital_patient = target_req.get("hospital", "Patient") if target_req else "Patient"
+
+    message = (
+        f"GOOD NEWS: {donor_name} ({donor_blood}) is READY TO DONATE for your request at {hospital_patient}! "
+        f"Contact: {donor_contact or 'Available in network'}"
+    )
+
+    alert_item = add_alert_fn(req_id, donor_name, donor_blood, message)
+    return jsonify({
+        "success": True,
+        "message": f"Thank you {donor_name}! Notification sent to {hospital_patient}.",
+        "alert": alert_item
+    }), 200
+
 @app.route("/api/alerts", methods=["GET"])
 def list_alerts():
     alerts = get_alerts_fn()

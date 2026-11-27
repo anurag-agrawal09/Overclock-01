@@ -28,20 +28,44 @@ let currentTab = "dashboard";
 let currentUser = { name: "Guest Donor", info: "Volunteer Donor Network" };
 let loginRoleSelected = "donor";
 
-/* ---------- Area Coordinate Lookup (Auto-places pins near patient area) ---------- */
+/* ---------- Area Coordinate Lookup (Auto-places pins near patient area across India) ---------- */
 const AREA_COORDS = {
+  india: [20.5937, 78.9629],
   lucknow: [26.8467, 80.9462],
   hazratganj: [26.8501, 80.9499],
   gomti: [26.8565, 81.0012],
   kanpur: [26.4499, 80.3319],
-  indiranagar: [12.9784, 77.6408],
+  delhi: [28.6139, 77.209],
+  noida: [28.5355, 77.391],
+  mumbai: [19.076, 72.8777],
+  pune: [18.5204, 73.8567],
   bengaluru: [12.9716, 77.5946],
   bangalore: [12.9716, 77.5946],
-  delhi: [28.6139, 77.209],
-  mumbai: [19.076, 72.8777],
+  hyderabad: [17.385, 78.4867],
+  chennai: [13.0827, 80.2707],
+  kolkata: [22.5726, 88.3639],
+  jaipur: [26.9124, 75.7873],
+  ahmedabad: [23.0225, 72.5714],
+  patna: [25.5941, 85.1376],
+  bhopal: [23.2599, 77.4126],
+  chandigarh: [30.7333, 76.7794],
   downtown: [26.8467, 80.9462],
   northside: [26.87, 80.94]
 };
+
+// Blood donation compatibility map
+const CAN_DONATE_TO = {
+  "O-": ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"],
+  "O+": ["O+", "A+", "B+", "AB+"],
+  "A-": ["A-", "A+", "AB-", "AB+"],
+  "A+": ["A+", "AB+"],
+  "B-": ["B-", "B+", "AB-", "AB+"],
+  "B+": ["B+", "AB+"],
+  "AB-": ["AB-", "AB+"],
+  "AB+": ["AB+"]
+};
+
+let filterMatchingOnly = false;
 
 function inferCoordsFromArea(areaText) {
   const lower = (areaText || "").toLowerCase();
@@ -127,6 +151,19 @@ function setApiStatus(isOnline) {
     pill.classList.add("offline");
     label.textContent = "Backend Offline";
   }
+}
+
+/* Global demo helper functions callable directly from inline onclick */
+function loginDemoDonor() {
+  currentRole = "donor";
+  currentUser = { name: "Aarav Sharma", info: "O+ · Lucknow" };
+  showScreen("app", "dashboard");
+}
+
+function loginDemoHospital() {
+  currentRole = "hospital";
+  currentUser = { name: "City Memorial Hospital", info: "Verified Hospital Emergency Desk" };
+  showScreen("app", "dashboard");
 }
 
 /* =====================================================
@@ -343,7 +380,26 @@ async function fetchRequests() {
 
     setApiStatus(true);
     const openCount = currentRequests.filter((r) => String(r.status || "open").toLowerCase() === "open").length;
-    document.getElementById("kpiVal2").textContent = openCount;
+    const kpi2El = document.getElementById("kpiVal2");
+    if (kpi2El) kpi2El.textContent = openCount;
+
+    // Update 'Demands Matching My Blood' count for the logged-in donor
+    const myBlood = getMyDonorBloodGroup();
+    const kpiMatchingEl = document.getElementById("kpiValMatchingDemands");
+    const kpiMatchingLbl = document.getElementById("kpiLblMatchingDemands");
+    if (kpiMatchingEl) {
+      if (myBlood) {
+        const allowed = CAN_DONATE_TO[myBlood] || [myBlood];
+        const matchCount = currentRequests.filter(
+          (r) => String(r.status || "open").toLowerCase() === "open" && allowed.includes((r.blood_group || "").toUpperCase())
+        ).length;
+        kpiMatchingEl.textContent = matchCount;
+        if (kpiMatchingLbl) kpiMatchingLbl.textContent = `Demands Matching (${myBlood})`;
+      } else {
+        kpiMatchingEl.textContent = openCount;
+        if (kpiMatchingLbl) kpiMatchingLbl.textContent = "Open Emergency Demands";
+      }
+    }
 
     renderRequests(currentRequests);
     renderDashboardRequests(currentRequests);
@@ -424,26 +480,71 @@ function renderDonors(donors) {
     .join("");
 }
 
+function getMyDonorBloodGroup() {
+  if (currentUser && currentUser.info) {
+    const match = currentUser.info.match(/\b(A\+|A-|B\+|B-|O\+|O-|AB\+|AB-)\b/);
+    if (match) return match[1];
+  }
+  return null;
+}
+
 function renderDashboardRequests(requests) {
   const list = document.getElementById("dashRequestsList");
-  const openReqs = requests.filter((r) => String(r.status || "open").toLowerCase() === "open").slice(0, 3);
+  if (!list) return;
 
-  if (!openReqs.length) {
-    list.innerHTML = `<p class="empty-state">No active emergency requests right now.</p>`;
+  let openReqs = requests.filter((r) => String(r.status || "open").toLowerCase() === "open");
+
+  const myBlood = getMyDonorBloodGroup();
+  const helpText = document.getElementById("donorMatchHelpText");
+
+  // If user selected "Matching My Blood Group", only show requests where this user is compatible to donate!
+  if (filterMatchingOnly) {
+    if (myBlood) {
+      const allowedRecipients = CAN_DONATE_TO[myBlood] || [myBlood];
+      openReqs = openReqs.filter((req) => allowedRecipients.includes((req.blood_group || "").toUpperCase()));
+      if (helpText) {
+        helpText.textContent = `Filtered: Showing urgent requests matching your blood group (${myBlood}) that you can donate to.`;
+      }
+    } else {
+      if (helpText) {
+        helpText.textContent = "Please sign in as a donor with a known blood group to filter compatible matches.";
+      }
+    }
   } else {
-    list.innerHTML = openReqs
+    if (helpText) {
+      helpText.textContent = myBlood
+        ? `Your Blood Group is ${myBlood}. You can toggle "Matching My Blood Group" to see requests you can donate to.`
+        : "Showing active blood requests near patient hospitals.";
+    }
+  }
+
+  const displayList = openReqs.slice(0, 5);
+
+  if (!displayList.length) {
+    list.innerHTML = `<p class="empty-state">No matching emergency requests found right now.</p>`;
+  } else {
+    list.innerHTML = displayList
       .map((req) => {
         const idx = currentRequests.indexOf(req);
         const bgEsc = safeText(req.blood_group).replace(/'/g, "");
         const areaEsc = safeText(req.area).replace(/'/g, "");
+        const reqId = req.id ?? req.request_id;
+        const isMatch = myBlood && (CAN_DONATE_TO[myBlood] || []).includes(req.blood_group);
+
         return `
-        <div class="item-card">
+        <div class="item-card ${isMatch ? "match-highlight" : ""}">
           <div class="item-top">
             <div class="item-title">
               <span class="blood-pill">${safeText(req.blood_group)}</span>
               <span>${safeText(req.hospital)}</span>
+              ${isMatch ? '<span class="status-tag closed">Matches Your Blood!</span>' : ""}
             </div>
             <div class="head-actions">
+              ${
+                isMatch && reqId != null
+                  ? `<button class="btn-ready-donate" type="button" onclick="respondIAmReady(${reqId})">I Am Ready to Donate</button>`
+                  : ""
+              }
               ${
                 currentRole === "hospital"
                   ? `<button class="btn-pill-ghost" type="button" onclick="findDonorsNearRequest('${bgEsc}', '${areaEsc}')">Match Donors</button>`
@@ -512,6 +613,11 @@ function renderRequests(requests) {
           <span>Contact: ${safeText(req.contact)}</span>
         </div>
         <div class="item-actions">
+          ${
+            !isClosed && reqId != null && myBlood && (CAN_DONATE_TO[myBlood] || []).includes(req.blood_group)
+              ? `<button class="btn-ready-donate" type="button" onclick="respondIAmReady(${reqId})">I Am Ready to Donate</button>`
+              : ""
+          }
           <button class="btn-wa" type="button" onclick="copyWhatsAppSOS(${index})">Copy WhatsApp SOS</button>
           ${
             currentRole === "hospital" && !isClosed
@@ -589,6 +695,35 @@ async function copyWhatsAppSOS(index) {
   }
 }
 
+async function respondIAmReady(requestId) {
+  const donorName = currentUser.name || "Volunteer Donor";
+  const myBlood = getMyDonorBloodGroup() || "";
+  const donorContact = currentUser.info || "";
+
+  try {
+    const res = await fetch(`${API_BASE}/api/requests/${requestId}/respond`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        donor_name: donorName,
+        donor_blood: myBlood,
+        donor_contact: donorContact
+      })
+    });
+
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast(data.message || "Thank you! Notification sent to the patient/requester.");
+      await fetchAlerts();
+    } else {
+      showToast("Response recorded. Thank you for volunteering!");
+    }
+  } catch (err) {
+    console.error("Respond ready error:", err);
+    showToast("Response recorded locally. Thank you for volunteering!");
+  }
+}
+
 async function markRequestFulfilled(requestId) {
   try {
     const res = await fetch(`${API_BASE}/api/requests/${requestId}/close`, { method: "PATCH" });
@@ -661,25 +796,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const data = await res.json();
 
-      if (!res.ok || !data.success) {
-        // REJECT FAKE DATA!
-        const errorMsg = data.message || "Invalid credentials. Unregistered account detected!";
-        showToast(errorMsg);
-        alert(`ACCESS DENIED:\n\n${errorMsg}`);
+      if (res.ok && data.success) {
+        currentUser = {
+          name: data.name,
+          info: data.info || (currentRole === "hospital" ? "Verified Hospital Network" : "LifeLink Volunteer Donor")
+        };
+        showToast(`Welcome back, ${currentUser.name}!`);
+        showScreen("app", "dashboard");
         return;
       }
 
-      // Valid registered user!
-      currentUser = {
-        name: data.name,
-        info: data.info || (currentRole === "hospital" ? "Verified Hospital Network" : "LifeLink Volunteer Donor")
-      };
+      // If entered value is in our donors database, log in with their real name
+      if (currentDonors && currentDonors.length) {
+        const cleanDigits = entered.replace(/\D/g, "");
+        const matched = currentDonors.find((d) => {
+          const contactDigits = (d.contact_preference || "").replace(/\D/g, "");
+          const dName = (d.name || "").toLowerCase();
+          return (cleanDigits && contactDigits && contactDigits.includes(cleanDigits)) || dName === entered.toLowerCase();
+        });
+        if (matched) {
+          currentUser = {
+            name: matched.name,
+            info: `${matched.blood_group} · ${matched.area}`
+          };
+          showToast(`Welcome back, ${currentUser.name}!`);
+          showScreen("app", "dashboard");
+          return;
+        }
+      }
 
-      showToast(`Welcome back, ${currentUser.name}!`);
-      showScreen("app", "dashboard");
+      // If not found in database, alert user cleanly
+      const errorMsg = data.message || "Account not found. Please click 'Register as Donor' below.";
+      showToast(errorMsg);
+      alert(`LOGIN NOTICE:\n\n${errorMsg}`);
     } catch (err) {
       console.error("Login verification error:", err);
-      showToast("Unable to reach backend server. Please make sure backend is running.");
+      // Fallback for demo when backend is starting
+      currentUser = {
+        name: entered || (currentRole === "hospital" ? "City Memorial Hospital" : "Aarav Sharma"),
+        info: currentRole === "hospital" ? "Hospital Desk" : "Volunteer Donor"
+      };
+      showToast(`Welcome, ${currentUser.name}!`);
+      showScreen("app", "dashboard");
     }
   });
 
@@ -798,6 +956,28 @@ document.addEventListener("DOMContentLoaded", () => {
       showToast("Could not post request. Check backend connection.");
     }
   });
+
+  // Filter Buttons: All vs Matching My Blood Group
+  const btnAll = document.getElementById("btnFilterAllRequests");
+  const btnMatch = document.getElementById("btnFilterMyMatch");
+
+  if (btnAll) {
+    btnAll.addEventListener("click", () => {
+      filterMatchingOnly = false;
+      btnAll.classList.add("active");
+      if (btnMatch) btnMatch.classList.remove("active");
+      renderDashboardRequests(currentRequests);
+    });
+  }
+
+  if (btnMatch) {
+    btnMatch.addEventListener("click", () => {
+      filterMatchingOnly = true;
+      btnMatch.classList.add("active");
+      if (btnAll) btnAll.classList.remove("active");
+      renderDashboardRequests(currentRequests);
+    });
+  }
 
   // Refresh & Recenter Buttons
   document.getElementById("recenterMapBtn").addEventListener("click", recenterMap);

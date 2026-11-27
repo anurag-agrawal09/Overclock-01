@@ -84,11 +84,11 @@
 
         <div class="auth-action-columns">
           <div class="auth-action-col">
-            <button id="demoDonorBtn" class="btn-soft full" type="button">Quick Demo: Donor View</button>
+            <button id="demoDonorBtn" class="btn-soft full" type="button" onclick="loginDemoDonor()">Quick Demo: Donor View</button>
             <button class="btn-outline-crimson full" type="button" onclick="showScreen('donor-register')">Register as Donor</button>
           </div>
           <div class="auth-action-col">
-            <button id="demoHospitalBtn" class="btn-soft full" type="button">Quick Demo: Hospital View</button>
+            <button id="demoHospitalBtn" class="btn-soft full" type="button" onclick="loginDemoHospital()">Quick Demo: Hospital View</button>
             <button class="btn-outline-crimson full" type="button" onclick="showScreen('hospital-register')">Register Hospital</button>
           </div>
         </div>
@@ -419,10 +419,10 @@
 
           <!-- 4 KPI STAT CARDS -->
           <div class="kpi-grid">
-            <div class="kpi-card">
+            <div class="kpi-card highlight-card">
               <div>
-                <div class="kpi-val" id="kpiVal1">0</div>
-                <div class="kpi-lbl" id="kpiLbl1">Eligible Donors</div>
+                <div class="kpi-val" id="kpiValMatchingDemands">0</div>
+                <div class="kpi-lbl" id="kpiLblMatchingDemands">Demands Matching My Blood</div>
               </div>
             </div>
             <div class="kpi-card">
@@ -433,14 +433,14 @@
             </div>
             <div class="kpi-card">
               <div>
-                <div class="kpi-val" id="kpiVal3">0</div>
-                <div class="kpi-lbl" id="kpiLbl3">Live Alerts Sent</div>
+                <div class="kpi-val" id="kpiVal1">0</div>
+                <div class="kpi-lbl" id="kpiLbl1">Eligible Donors</div>
               </div>
             </div>
             <div class="kpi-card">
               <div>
-                <div class="kpi-val" id="kpiVal4">90 Days</div>
-                <div class="kpi-lbl" id="kpiLbl4">Safe Rest Rule</div>
+                <div class="kpi-val" id="kpiVal3">0</div>
+                <div class="kpi-lbl" id="kpiLbl3">Live Alerts Sent</div>
               </div>
             </div>
           </div>
@@ -449,9 +449,20 @@
           <div class="two-col-panel">
             <div class="panel-card">
               <div class="panel-head">
-                <h3>Nearby Emergency Requests</h3>
+                <div>
+                  <h3>Nearby Emergency Requests</h3>
+                  <p class="panel-sub" id="donorMatchHelpText">Showing active blood requests.</p>
+                </div>
                 <button class="btn-pill-sm" type="button" onclick="navigateTab('requests')">View All</button>
               </div>
+
+              <!-- FILTER BAR: MATCHING BLOOD GROUPS NEAR ME -->
+              <div class="matching-filter-bar">
+                <span class="filter-label">Filter:</span>
+                <button id="btnFilterAllRequests" class="btn-pill-chip active" type="button">All Requests</button>
+                <button id="btnFilterMyMatch" class="btn-pill-chip" type="button">Matching My Blood Group</button>
+              </div>
+
               <div id="dashRequestsList" class="panel-list">
                 <p class="empty-state">Loading emergency requests…</p>
               </div>

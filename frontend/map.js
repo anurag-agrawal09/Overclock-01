@@ -13,7 +13,7 @@ let lastBounds = null;
 let mapOverlayEl = null;
 
 // Default center (India) if no markers have coordinates yet
-const DEFAULT_CENTER = [20.5937, 78.9629];
+const DEFAULT_CENTER = [22.5937, 78.9629];
 const DEFAULT_ZOOM = 5;
 
 /**
