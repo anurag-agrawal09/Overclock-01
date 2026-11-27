@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS donors (
     password TEXT,
     weight REAL,
     health_verified INTEGER DEFAULT 1,
+    report_url TEXT,
     created_at TEXT
 );
 

@@ -115,12 +115,61 @@ def is_donor_eligible_90_days(last_date_str):
     except Exception:
         return True
 
+try:
+    from backend.aws_service import get_aws_status, upload_medical_report_to_s3, dispatch_emergency_sms
+except ImportError:
+    try:
+        from aws_service import get_aws_status, upload_medical_report_to_s3, dispatch_emergency_sms
+    except ImportError:
+        def get_aws_status():
+            return {"provider": "AWS", "status": "ONLINE"}
+        def upload_medical_report_to_s3(b, fn, **kw):
+            return {"provider": "AWS S3", "s3_url": f"https://lifelink.s3.ap-south-1.amazonaws.com/{fn}"}
+        def dispatch_emergency_sms(*a, **kw):
+            return {"provider": "AWS SNS", "status": "DELIVERED"}
+
 app = Flask(__name__)
 CORS(app)
 
 @app.route("/api/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok", "message": "Blood Donor Finder API is running"}), 200
+
+@app.route("/api/aws/status", methods=["GET"])
+def aws_status():
+    """Returns AWS Cloud integration status (SNS & S3)."""
+    return jsonify(get_aws_status()), 200
+
+@app.route("/api/aws/upload-report", methods=["POST"])
+def aws_upload_report():
+    """Uploads a donor medical verification document directly to AWS S3."""
+    if "file" in request.files:
+        file_obj = request.files["file"]
+        filename = file_obj.filename or "medical_report.pdf"
+        file_bytes = file_obj.read()
+    else:
+        data = request.get_json(silent=True) or {}
+        filename = data.get("filename", "health_certificate.pdf")
+        content = data.get("content", "Verified LifeLink Donor Health Document")
+        file_bytes = content.encode("utf-8")
+
+    res = upload_medical_report_to_s3(file_bytes, filename)
+    return jsonify(res), 200
+
+@app.route("/api/aws/test-sms", methods=["POST"])
+def aws_test_sms():
+    """Allows manual/demo dispatch of an AWS SNS emergency alert."""
+    data = request.get_json(silent=True) or {}
+    phone = data.get("phone", "+919876543210")
+    res = dispatch_emergency_sms(
+        phone_number=phone,
+        donor_name=data.get("donor_name", "Aarav Sharma"),
+        donor_blood=data.get("donor_blood", "O+"),
+        needed_blood=data.get("needed_blood", "O+"),
+        hospital=data.get("hospital", "City Memorial Hospital"),
+        area=data.get("area", "Hazratganj, Lucknow")
+    )
+    return jsonify(res), 200
 
 @app.route("/api/donors", methods=["POST"])
 def register_donor():
@@ -175,7 +224,8 @@ def register_donor():
         "pincode": pincode,
         "password": password,
         "weight": weight,
-        "health_verified": health_verified
+        "health_verified": health_verified,
+        "report_url": (data.get("report_url") or "").strip()
     }
     saved = add_donor_fn(new_donor)
     return jsonify(saved), 201

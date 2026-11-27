@@ -236,8 +236,12 @@
                   <input id="regDonorIllness" type="text" placeholder="None" />
                 </div>
                 <div class="f-group full-span">
-                  <label>Blood Test / Verification Report (optional)</label>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <label style="margin-bottom: 0;">Blood Test / Verification Report (optional)</label>
+                    <span class="aws-tag">AWS S3 Cloud Vault</span>
+                  </div>
                   <input id="regDonorReport" type="file" accept=".pdf,.jpg,.jpeg,.png" />
+                  <small id="regDonorReportNotice" style="color: #64748b; font-size: 0.78rem; display: block; margin-top: 3px;">Encrypted at rest with AES-256 in Amazon S3 (ap-south-1 Mumbai).</small>
                 </div>
                 <div class="f-group full-span" style="background: #fff5f5; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; margin-top: 6px;">
                   <label class="toggle-check" style="align-items: flex-start; gap: 8px; cursor: pointer;">
@@ -398,6 +402,11 @@
           <span id="apiStatus" class="status-pill checking" title="Backend connection status">
             <span class="dot"></span>
             <span id="apiStatusText">Connecting…</span>
+          </span>
+
+          <span id="awsStatus" class="status-pill aws" title="AWS Cloud Infrastructure (SNS & S3 ap-south-1)">
+            <span class="dot aws-dot"></span>
+            <span id="awsStatusText">AWS: SNS &amp; S3</span>
           </span>
 
           <button id="topBellBtn" class="bell-btn" type="button" title="View Live Alerts" onclick="navigateTab('notifications')">

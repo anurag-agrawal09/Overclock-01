@@ -33,7 +33,8 @@ def init_db():
             ("pincode", "pincode TEXT"),
             ("password", "password TEXT"),
             ("weight", "weight REAL"),
-            ("health_verified", "health_verified INTEGER DEFAULT 1")
+            ("health_verified", "health_verified INTEGER DEFAULT 1"),
+            ("report_url", "report_url TEXT")
         ]
         for col_name, col_def in migrations:
             if col_name not in existing_cols:
@@ -51,9 +52,9 @@ def add_donor(data):
             INSERT INTO donors (
                 name, blood_group, area, contact_preference,
                 last_donation_date, is_visible, latitude, longitude,
-                dob, pincode, password, weight, health_verified, created_at
+                dob, pincode, password, weight, health_verified, report_url, created_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 data["name"],
@@ -69,6 +70,7 @@ def add_donor(data):
                 data.get("password"),
                 data.get("weight"),
                 1 if data.get("health_verified", True) in [True, 1, "1", "true", "True"] else 0,
+                data.get("report_url"),
                 created_at,
             ),
         )
@@ -89,6 +91,7 @@ def add_donor(data):
         "password": data.get("password"),
         "weight": data.get("weight"),
         "health_verified": 1 if data.get("health_verified", True) in [True, 1, "1", "true", "True"] else 0,
+        "report_url": data.get("report_url"),
         "created_at": created_at,
     }
 
