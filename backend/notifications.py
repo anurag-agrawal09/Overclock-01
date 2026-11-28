@@ -70,7 +70,8 @@ def generate_alerts_for_request(request_data, eligible_donors, add_alert_func):
             msg_id = sns_receipt.get("message_id", "SNS-SENT")
 
             msg = (
-                f"[{match_type}] Urgent: {hospital} in {area} needs {needed_group} blood. "
+                f"[{match_type}] Urgent:\n"
+                f"{hospital} in {area} needs {needed_group} blood.\n"
                 f"Your blood group is {donor_group}. [AWS SNS Dispatched · {msg_id}]"
             )
             alert_item = add_alert_func(req_id, donor_name, donor_group, msg)

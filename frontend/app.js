@@ -702,6 +702,67 @@ function renderRequests(requests) {
     .join("");
 }
 
+function formatAlertMessage(rawMessage) {
+  if (!rawMessage) return "";
+  let text = String(rawMessage).trim();
+
+  // Extract AWS SNS receipt if present
+  let awsTag = "";
+  const awsMatch = text.match(/\[AWS SNS Dispatched · (.*?)\]/);
+  if (awsMatch) {
+    awsTag = `<span class="aws-tag">AWS SNS SMS: ${safeText(awsMatch[1])}</span>`;
+    text = text.replace(/\[AWS SNS Dispatched · .*?\]/, "").trim();
+  }
+
+  // Check pattern: [MATCH TYPE] Urgent: Hospital in Area needs X blood. Your blood group is Y.
+  const regex = /^(\[(?:EXACT|COMPATIBLE)\s+MATCH\]\s*Urgent:?)\s*(.+?\.)\s*(Your blood group is\s+[A-Za-z0-9+-]+(?:\.|\b))\s*(.*)$/i;
+  const match = text.match(regex);
+
+  if (match) {
+    const header = match[1].trim();
+    const hospitalReq = match[2].trim();
+    const yourGroup = match[3].trim();
+    const remaining = match[4].trim();
+
+    return `
+      <div class="alert-block">
+        <div class="alert-line-header">${safeText(header)}</div>
+        <div class="alert-line-body">${safeText(hospitalReq)}</div>
+        <div class="alert-line-donor">${safeText(yourGroup)}</div>
+        ${remaining ? `<div class="alert-line-extra">${safeText(remaining)}</div>` : ""}
+        ${awsTag ? `<div class="alert-line-extra">${awsTag}</div>` : ""}
+      </div>
+    `;
+  }
+
+  // If message already has linebreaks (\n), format each line separately
+  if (text.includes("\n")) {
+    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+    return `
+      <div class="alert-block">
+        ${lines.map((l, i) => {
+          if (i === 0 && l.toUpperCase().includes("MATCH]")) {
+            return `<div class="alert-line-header">${safeText(l)}</div>`;
+          }
+          if (l.toLowerCase().startsWith("your blood group")) {
+            return `<div class="alert-line-donor">${safeText(l)}</div>`;
+          }
+          return `<div class="alert-line-body">${safeText(l)}</div>`;
+        }).join("")}
+        ${awsTag ? `<div class="alert-line-extra">${awsTag}</div>` : ""}
+      </div>
+    `;
+  }
+
+  // General fallback
+  return `
+    <div class="alert-block">
+      <div class="alert-line-body">${safeText(text)}</div>
+      ${awsTag ? `<div class="alert-line-extra">${awsTag}</div>` : ""}
+    </div>
+  `;
+}
+
 function renderAlerts(alerts) {
   const list = document.getElementById("alertsList");
   if (!alerts.length) {
@@ -711,13 +772,10 @@ function renderAlerts(alerts) {
   list.innerHTML = alerts
     .map(
       (a) => {
-        let msgHtml = safeText(a.message || JSON.stringify(a));
-        if (msgHtml.includes("[AWS SNS Dispatched")) {
-          msgHtml = msgHtml.replace(/\[AWS SNS Dispatched · (.*?)\]/g, '<span class="aws-tag">AWS SNS SMS: $1</span>');
-        }
+        const contentHtml = formatAlertMessage(a.message || JSON.stringify(a));
         return `
-        <div class="item-card">
-          <div class="item-title">${msgHtml}</div>
+        <div class="item-card alert-item-card">
+          ${contentHtml}
           <div class="item-meta">
             ${currentRole === "hospital" && a.donor_name ? `<span>To: ${safeText(a.donor_name)} (${safeText(a.blood_group)})</span>` : ""}
             ${a.created_at ? `<span>Time: ${safeText(a.created_at)}</span>` : ""}
