@@ -12,7 +12,14 @@ const urlParamHost = new URLSearchParams(window.location.search).get("backend");
 if (urlParamHost) {
   localStorage.setItem("lifelink_backend_host", urlParamHost);
 }
-const savedBackend = localStorage.getItem("lifelink_backend_host");
+let savedBackend = localStorage.getItem("lifelink_backend_host");
+
+// If running on a live HTTPS domain (like Render), ignore stale localhost/HTTP settings
+if (window.location.protocol === "https:" && savedBackend && (savedBackend.includes("localhost") || savedBackend.includes("127.0.0.1") || savedBackend.startsWith("http:"))) {
+  localStorage.removeItem("lifelink_backend_host");
+  savedBackend = null;
+}
+
 let defaultBase = "http://127.0.0.1:5000";
 if (window.location.protocol.startsWith("http")) {
   const p = window.location.port;
@@ -1160,8 +1167,21 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector(".sidebar").classList.toggle("open");
   });
 
-  // Check backend health immediately
-  fetch(`${API_BASE}/api/health`)
-    .then((r) => setApiStatus(r.ok))
-    .catch(() => setApiStatus(false));
+  // Check backend health immediately with automatic retry for cloud wakeups
+  async function verifyHealth() {
+    try {
+      const r = await fetch(`${API_BASE}/api/health`);
+      if (r.ok) {
+        setApiStatus(true);
+      } else {
+        setApiStatus(false);
+        setTimeout(verifyHealth, 4000);
+      }
+    } catch {
+      setApiStatus(false);
+      // Retry in background in case server is waking up
+      setTimeout(verifyHealth, 4000);
+    }
+  }
+  verifyHealth();
 });
