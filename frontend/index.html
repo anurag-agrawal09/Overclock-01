@@ -163,7 +163,7 @@
                   <input id="regDonorEmail" type="email" placeholder="donor@email.com" />
                 </div>
                 <div class="f-group">
-                  <label>Account Password (to protect your data) *</label>
+                  <label>Account Password *</label>
                   <input id="regDonorPass" type="password" placeholder="Create a secure password" minlength="4" required />
                 </div>
               </div>
@@ -232,21 +232,12 @@
                   <input id="regDonorWeight" type="number" placeholder="e.g. 62" min="50" max="150" required />
                 </div>
                 <div class="f-group">
-                  <label>Recent Illness</label>
-                  <input id="regDonorIllness" type="text" placeholder="None" />
+                  <label>Recent Illness *</label>
+                  <input id="regDonorIllness" type="text" placeholder="e.g. None" required />
                 </div>
                 <div class="f-group full-span">
-                  <label>Blood Test / Verification Report (optional)</label>
-                  <input id="regDonorReport" type="file" accept=".pdf,.jpg,.jpeg,.png" />
-                </div>
-                <div class="f-group full-span" style="background: #fff5f5; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; margin-top: 6px;">
-                  <label class="toggle-check" style="align-items: flex-start; gap: 8px; cursor: pointer;">
-                    <input id="regDonorHealthVerified" type="checkbox" required />
-                    <span style="font-size: 0.82rem; line-height: 1.35; color: #1e293b;">
-                      <strong style="color: #991b1b;">Mandatory Health Verification *</strong><br />
-                      I confirm I weigh &ge; 50 kg, have no communicable/blood-borne diseases (HIV, Hepatitis, Malaria), have no serious chronic cardiac/pulmonary ailments, and am medically fit to donate blood.
-                    </span>
-                  </label>
+                  <label>Blood Test / Verification Report *</label>
+                  <input id="regDonorReport" type="file" accept=".pdf,.jpg,.jpeg,.png" required />
                 </div>
               </div>
             </div>
