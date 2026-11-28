@@ -163,7 +163,7 @@
                   <input id="regDonorEmail" type="email" placeholder="donor@email.com" />
                 </div>
                 <div class="f-group">
-                  <label>Account Password (to protect your data) *</label>
+                  <label>Account Password *</label>
                   <input id="regDonorPass" type="password" placeholder="Create a secure password" minlength="4" required />
                 </div>
               </div>
@@ -232,15 +232,15 @@
                   <input id="regDonorWeight" type="number" placeholder="e.g. 62" min="50" max="150" required />
                 </div>
                 <div class="f-group">
-                  <label>Recent Illness</label>
-                  <input id="regDonorIllness" type="text" placeholder="None" />
+                  <label>Recent Illness *</label>
+                  <input id="regDonorIllness" type="text" placeholder="e.g. None" required />
                 </div>
                 <div class="f-group full-span">
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <label style="margin-bottom: 0;">Blood Test / Verification Report (optional)</label>
+                    <label style="margin-bottom: 0;">Blood Test / Verification Report *</label>
                     <span class="aws-tag">AWS S3 Cloud Vault</span>
                   </div>
-                  <input id="regDonorReport" type="file" accept=".pdf,.jpg,.jpeg,.png" />
+                  <input id="regDonorReport" type="file" accept=".pdf,.jpg,.jpeg,.png" required />
                   <small id="regDonorReportNotice" style="color: #64748b; font-size: 0.78rem; display: block; margin-top: 3px;">Encrypted at rest with AES-256 in Amazon S3 (ap-south-1 Mumbai).</small>
                 </div>
                 <div class="f-group full-span" style="background: #fff5f5; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; margin-top: 6px;">

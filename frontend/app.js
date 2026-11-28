@@ -938,7 +938,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const area = document.getElementById("regDonorArea").value.trim();
     const pincode = document.getElementById("regDonorPin").value.trim();
     const weightVal = parseFloat(document.getElementById("regDonorWeight").value);
-    const healthVerified = document.getElementById("regDonorHealthVerified").checked;
+    const recentIllness = document.getElementById("regDonorIllness").value.trim();
 
     // 1. Mandatory DOB & Age 18 to 65 check
     if (!dob) {
@@ -972,19 +972,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // 4. Mandatory Health Verification
-    if (!healthVerified) {
-      alert("Registration Error:\nHealth verification declaration is compulsory. You must confirm that you meet medical criteria to register.");
-      showToast("Health verification is compulsory.");
-      return;
-    }
-
-    // 5. Mandatory Weight Check (min 50 kg)
-    if (isNaN(weightVal) || weightVal < 50) {
-      alert("Registration Error:\nDonor weight must be at least 50 kg for blood donation safety.");
-      showToast("Minimum weight is 50 kg.");
-      return;
-    }
+    // 4. Health & Verification fields use native HTML required validation ("Please fill out this field.")
 
     // 6. Mandatory Last Donation Date Check
     if (!lastDonation) {
@@ -1031,7 +1019,8 @@ document.addEventListener("DOMContentLoaded", () => {
       pincode: pincode,
       password: password,
       weight: weightVal,
-      health_verified: healthVerified,
+      recent_illness: recentIllness,
+      health_verified: true,
       report_url: s3ReportUrl
     };
 
