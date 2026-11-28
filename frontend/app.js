@@ -152,6 +152,24 @@ function safeText(value) {
 }
 
 /* ---------- Helper: Backend Connection Status ---------- */
+async function checkAwsStatus() {
+  const pill = document.getElementById("awsStatus");
+  const label = document.getElementById("awsStatusText");
+  if (!pill || !label) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/aws/status`);
+    if (res.ok) {
+      const data = await res.json();
+      pill.classList.remove("offline");
+      pill.classList.add("aws");
+      label.textContent = "AWS: SNS & S3";
+      pill.title = `AWS Cloud Connected\nRegion: ${data.region_name || data.region}\nS3 Vault: ${data.s3_bucket}\nSNS SMS Gateway: Online`;
+    }
+  } catch {
+    // Graceful offline fallback
+  }
+}
+
 function setApiStatus(isOnline) {
   const pill = document.getElementById("apiStatus");
   const label = document.getElementById("apiStatusText");
@@ -160,6 +178,7 @@ function setApiStatus(isOnline) {
   if (isOnline) {
     pill.classList.add("online");
     label.textContent = "Backend Connected";
+    checkAwsStatus();
   } else {
     pill.classList.add("offline");
     label.textContent = "Backend Offline";
@@ -657,15 +676,21 @@ function renderAlerts(alerts) {
   }
   list.innerHTML = alerts
     .map(
-      (a) => `
-      <div class="item-card">
-        <div class="item-title">${safeText(a.message || JSON.stringify(a))}</div>
-        <div class="item-meta">
-          ${currentRole === "hospital" && a.donor_name ? `<span>To: ${safeText(a.donor_name)} (${safeText(a.blood_group)})</span>` : ""}
-          ${a.created_at ? `<span>Time: ${safeText(a.created_at)}</span>` : ""}
+      (a) => {
+        let msgHtml = safeText(a.message || JSON.stringify(a));
+        if (msgHtml.includes("[AWS SNS Dispatched")) {
+          msgHtml = msgHtml.replace(/\[AWS SNS Dispatched · (.*?)\]/g, '<span class="aws-tag">AWS SNS SMS: $1</span>');
+        }
+        return `
+        <div class="item-card">
+          <div class="item-title">${msgHtml}</div>
+          <div class="item-meta">
+            ${currentRole === "hospital" && a.donor_name ? `<span>To: ${safeText(a.donor_name)} (${safeText(a.blood_group)})</span>` : ""}
+            ${a.created_at ? `<span>Time: ${safeText(a.created_at)}</span>` : ""}
+          </div>
         </div>
-      </div>
-    `
+      `;
+      }
     )
     .join("");
 }
@@ -959,6 +984,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const fullArea = city ? `${area}, ${city}` : area;
     const coords = inferCoordsFromArea(fullArea);
 
+    // Optional: Upload medical document to AWS S3
+    let s3ReportUrl = "";
+    const reportFileInput = document.getElementById("regDonorReport");
+    if (reportFileInput && reportFileInput.files && reportFileInput.files[0]) {
+      try {
+        showToast("Uploading medical report to AWS S3 Cloud Vault...");
+        const formData = new FormData();
+        formData.append("file", reportFileInput.files[0]);
+        const s3Res = await fetch(`${API_BASE}/api/aws/upload-report`, {
+          method: "POST",
+          body: formData
+        });
+        if (s3Res.ok) {
+          const s3Data = await s3Res.json();
+          s3ReportUrl = s3Data.s3_url || "";
+          showToast("Document stored encrypted in AWS S3 vault!");
+        }
+      } catch (uploadErr) {
+        console.warn("AWS S3 upload:", uploadErr);
+      }
+    }
+
     const payload = {
       name: donorName,
       blood_group: bloodGroup,
@@ -973,7 +1020,8 @@ document.addEventListener("DOMContentLoaded", () => {
       password: password,
       weight: weightVal,
       recent_illness: recentIllness,
-      health_verified: true
+      health_verified: true,
+      report_url: s3ReportUrl
     };
 
     try {

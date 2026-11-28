@@ -15,7 +15,7 @@ def run_all_tests():
     print(" INTEGRATION TEST SUITE: BLOOD DONOR FINDER & REQUEST BOARD")
     print("=" * 65)
     passed = 0
-    total = 7
+    total = 8
 
     # Use Flask's in-process test_client (zero network/socket permissions required)
     client = app.test_client()
@@ -234,6 +234,38 @@ def run_all_tests():
         passed += 1
     except Exception as e:
         print(f"[FAIL] Test 7: Eligibility & password validation failed: {e}")
+
+    # Test 8: AWS Cloud Integration (SNS Emergency SMS + S3 Medical Document Vault)
+    try:
+        # A. AWS Cloud Status Check
+        aws_resp = client.get("/api/aws/status")
+        assert aws_resp.status_code == 200
+        aws_data = aws_resp.get_json()
+        assert "services" in aws_data
+        assert aws_data["services"]["sns"]["status"] == "ONLINE"
+        assert aws_data["services"]["s3"]["status"] == "ONLINE"
+
+        # B. AWS S3 Medical Document Upload
+        s3_resp = client.post("/api/aws/upload-report", json={
+            "filename": "test_blood_panel.pdf",
+            "content": "Hemoglobin: 14.5 g/dL, Blood Group O+ Verified"
+        })
+        assert s3_resp.status_code == 200
+        s3_data = s3_resp.get_json()
+        assert s3_data["success"] is True
+        assert "amazonaws.com" in s3_data.get("s3_url", "")
+        assert "donor-reports" in s3_data.get("key", "")
+
+        # C. AWS SNS Alert Dispatch
+        alerts_resp = client.get("/api/alerts")
+        alerts = alerts_resp.get_json()
+        sns_dispatched = [a for a in alerts if "AWS SNS" in a.get("message", "")]
+        assert len(sns_dispatched) > 0
+
+        print("[PASS] Test 8: AWS Cloud integration (SNS SMS Dispatch & S3 Document Vault) verified!")
+        passed += 1
+    except Exception as e:
+        print(f"[FAIL] Test 8: AWS Cloud integration test failed: {e}")
 
     print("=" * 65)
     print(f" RESULT: {passed}/{total} tests passed.")
