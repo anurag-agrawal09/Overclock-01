@@ -15,7 +15,7 @@ def run_all_tests():
     print(" INTEGRATION TEST SUITE: BLOOD DONOR FINDER & REQUEST BOARD")
     print("=" * 65)
     passed = 0
-    total = 8
+    total = 9
 
     # Use Flask's in-process test_client (zero network/socket permissions required)
     client = app.test_client()
@@ -266,6 +266,35 @@ def run_all_tests():
         passed += 1
     except Exception as e:
         print(f"[FAIL] Test 8: AWS Cloud integration test failed: {e}")
+
+    # -------------------------------------------------------------
+    # TEST 9: Authorized Aadhaar Age Verification & Verhoeff Check
+    # -------------------------------------------------------------
+    try:
+        # A. Invalid Aadhaar should fail Verhoeff algorithm
+        inv_resp = client.post("/api/aadhaar/request-otp", json={"aadhaar_number": "123456789012"})
+        assert inv_resp.status_code == 400
+
+        # B. Valid Aadhaar passes and sends OTP
+        req_resp = client.post("/api/aadhaar/request-otp", json={"aadhaar_number": "999999990019"})
+        assert req_resp.status_code == 200
+        req_data = req_resp.get_json()
+        assert req_data.get("success") is True
+        sess_id = req_data.get("session_id")
+        assert req_data.get("masked_aadhaar") == "XXXX-XXXX-0019"
+
+        # C. Verify OTP and check age calculation
+        v_resp = client.post("/api/aadhaar/verify-otp", json={"session_id": sess_id, "otp": "123456"})
+        assert v_resp.status_code == 200
+        v_data = v_resp.get_json()
+        assert v_data.get("success") is True
+        assert v_data.get("is_eligible") is True
+        assert 18 <= v_data.get("age") <= 65
+
+        print("[PASS] Test 9: Authorized Aadhaar age verification & Verhoeff checksum validated!")
+        passed += 1
+    except Exception as e:
+        print(f"[FAIL] Test 9: Aadhaar age verification failed: {e}")
 
     print("=" * 65)
     print(f" RESULT: {passed}/{total} tests passed.")

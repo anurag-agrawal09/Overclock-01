@@ -1017,6 +1017,126 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Authorized Aadhaar Age & Identity Verification Flow
+  let aadhaarSessionId = null;
+  const aadhaarInput = document.getElementById("regDonorAadhaar");
+  const btnSendAadhaarOtp = document.getElementById("btnAadhaarSendOtp");
+  const otpRow = document.getElementById("aadhaarOtpRow");
+  const otpInput = document.getElementById("regDonorAadhaarOtp");
+  const btnVerifyAadhaarOtp = document.getElementById("btnAadhaarVerifyOtp");
+  const otpHint = document.getElementById("aadhaarOtpHint");
+  const verifiedBadge = document.getElementById("aadhaarVerifiedBadge");
+  const verifiedAgeSpan = document.getElementById("aadhaarVerifiedAge");
+  const maskedIdSpan = document.getElementById("aadhaarMaskedId");
+
+  if (aadhaarInput) {
+    // Auto format 12 digits into 4-digit groups (XXXX XXXX XXXX)
+    aadhaarInput.addEventListener("input", (e) => {
+      let raw = e.target.value.replace(/\D/g, "").slice(0, 12);
+      let formatted = raw.replace(/(\d{4})(?=\d)/g, "$1 ");
+      e.target.value = formatted;
+    });
+  }
+
+  if (btnSendAadhaarOtp) {
+    btnSendAadhaarOtp.addEventListener("click", async () => {
+      const rawNum = (aadhaarInput.value || "").replace(/\s/g, "");
+      if (rawNum.length !== 12) {
+        alert("Please enter a valid 12-digit Aadhaar Number.");
+        return;
+      }
+      btnSendAadhaarOtp.disabled = true;
+      btnSendAadhaarOtp.textContent = "Sending OTP...";
+
+      try {
+        const res = await fetch(`${API_BASE}/api/aadhaar/request-otp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ aadhaar_number: rawNum })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || "Aadhaar validation failed.");
+        }
+
+        aadhaarSessionId = data.session_id;
+        otpRow.classList.remove("hidden");
+        btnSendAadhaarOtp.textContent = "Resend OTP";
+        btnSendAadhaarOtp.disabled = false;
+        
+        if (data.demo_otp_hint) {
+          otpHint.textContent = `UIDAI Sandbox OTP Sent! Demo OTP: ${data.demo_otp_hint}`;
+        } else {
+          otpHint.textContent = data.message || "OTP sent to registered phone.";
+        }
+        showToast("OTP sent to mobile registered with Aadhaar.");
+      } catch (err) {
+        btnSendAadhaarOtp.disabled = false;
+        btnSendAadhaarOtp.textContent = "Send OTP";
+        alert(`Aadhaar Verification Error:\n${err.message}`);
+        showToast(err.message || "Failed to request Aadhaar OTP.");
+      }
+    });
+  }
+
+  if (btnVerifyAadhaarOtp) {
+    btnVerifyAadhaarOtp.addEventListener("click", async () => {
+      const otpVal = (otpInput.value || "").trim();
+      if (otpVal.length < 6) {
+        alert("Please enter the 6-digit OTP received on your mobile.");
+        return;
+      }
+      btnVerifyAadhaarOtp.disabled = true;
+      btnVerifyAadhaarOtp.textContent = "Verifying...";
+
+      try {
+        const res = await fetch(`${API_BASE}/api/aadhaar/verify-otp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ session_id: aadhaarSessionId, otp: otpVal })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || "OTP verification failed.");
+        }
+
+        if (!data.is_eligible) {
+          alert(`Eligibility Restriction:\n${data.message}`);
+          btnVerifyAadhaarOtp.disabled = false;
+          btnVerifyAadhaarOtp.textContent = "Verify Age";
+          return;
+        }
+
+        // Lock in verified DOB
+        if (dobInput) {
+          dobInput.value = data.dob;
+          dobInput.readOnly = true;
+          dobInput.style.background = "#f0fdf4";
+          dobInput.style.borderColor = "#86efac";
+          if (ageNotice) {
+            ageNotice.style.color = "#16a34a";
+            ageNotice.textContent = `Age: ${data.age} yrs (Verified from Aadhaar Record)`;
+          }
+        }
+
+        // Show green Aadhaar verification badge
+        otpRow.classList.add("hidden");
+        if (verifiedBadge) {
+          verifiedBadge.classList.remove("hidden");
+          verifiedAgeSpan.textContent = data.age;
+          maskedIdSpan.textContent = `Aadhaar ID: ${data.masked_aadhaar} · UIDAI Gateway Verified`;
+        }
+
+        showToast(`Age Verified: ${data.age} years. Eligible to donate!`);
+      } catch (err) {
+        btnVerifyAadhaarOtp.disabled = false;
+        btnVerifyAadhaarOtp.textContent = "Verify Age";
+        alert(`OTP Verification Failed:\n${err.message}`);
+        showToast(err.message || "Could not verify Aadhaar OTP.");
+      }
+    });
+  }
+
   // Donor Registration -> POST /api/donors
   document.getElementById("donorRegForm").addEventListener("submit", async (e) => {
     e.preventDefault();

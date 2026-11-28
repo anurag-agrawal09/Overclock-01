@@ -10,6 +10,7 @@ if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
 from backend.notifications import generate_alerts_for_request
+from backend.aadhaar_service import request_aadhaar_otp, verify_aadhaar_otp, validate_verhoeff
 
 # Try importing Member 3's database functions.
 # If Member 3 hasn't merged yet, use safe in-memory fallback stubs.
@@ -190,6 +191,25 @@ def aws_test_sms():
         area=data.get("area", "Hazratganj, Lucknow")
     )
     return jsonify(res), 200
+
+@app.route("/api/aadhaar/request-otp", methods=["POST"])
+def aadhaar_request_otp():
+    """Validates Aadhaar via Verhoeff algorithm and dispatches e-KYC OTP via authorized Sub-AUA."""
+    data = request.get_json(silent=True) or {}
+    aadhaar_num = data.get("aadhaar_number", "")
+    res = request_aadhaar_otp(aadhaar_num)
+    status_code = 200 if res.get("success") else 400
+    return jsonify(res), status_code
+
+@app.route("/api/aadhaar/verify-otp", methods=["POST"])
+def aadhaar_verify_otp():
+    """Verifies OTP, fetches verified DOB from authorized provider, and verifies age 18-65."""
+    data = request.get_json(silent=True) or {}
+    session_id = data.get("session_id", "")
+    otp = data.get("otp", "")
+    res = verify_aadhaar_otp(session_id, otp)
+    status_code = 200 if res.get("success") else 400
+    return jsonify(res), status_code
 
 @app.route("/api/donors", methods=["POST"])
 def register_donor():

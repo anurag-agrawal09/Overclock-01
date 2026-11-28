@@ -146,6 +146,31 @@
                   <input id="regDonorDob" type="date" required />
                   <small id="regDonorAgeNotice" style="color: #64748b; font-size: 0.78rem; display: block; margin-top: 3px;"></small>
                 </div>
+                <!-- Authorized Aadhaar e-KYC Verification Box -->
+                <div class="f-group full-span">
+                  <div class="aadhaar-verify-box">
+                    <div class="aadhaar-head">
+                      <span class="aadhaar-badge">Authorized Aadhaar e-KYC Verification</span>
+                      <small class="aadhaar-sub">Verify authentic age directly with UIDAI-authorized gateway</small>
+                    </div>
+                    <div class="aadhaar-inputs-row">
+                      <input id="regDonorAadhaar" type="text" placeholder="Enter 12-digit Aadhaar Number" maxlength="14" />
+                      <button id="btnAadhaarSendOtp" type="button" class="btn-pill-sm">Send OTP</button>
+                    </div>
+                    <div id="aadhaarOtpRow" class="aadhaar-otp-row hidden">
+                      <input id="regDonorAadhaarOtp" type="text" placeholder="6-digit OTP" maxlength="6" />
+                      <button id="btnAadhaarVerifyOtp" type="button" class="btn-pill-sm btn-verify-otp">Verify Age</button>
+                      <small id="aadhaarOtpHint" class="aadhaar-hint"></small>
+                    </div>
+                    <div id="aadhaarVerifiedBadge" class="aadhaar-success-banner hidden">
+                      <span class="aadhaar-check">✓</span>
+                      <div>
+                        <strong>Age Verified: <span id="aadhaarVerifiedAge">--</span> Years</strong>
+                        <p id="aadhaarMaskedId" style="margin: 0; font-size: 0.76rem; color: #15803d;"></p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 <div class="f-group">
                   <label>Gender</label>
                   <select id="regDonorGender">
