@@ -14,8 +14,9 @@ if (urlParamHost) {
 }
 let savedBackend = localStorage.getItem("lifelink_backend_host");
 
-// If running on a live HTTPS domain (like Render), ignore stale localhost/HTTP settings
-if (window.location.protocol === "https:" && savedBackend && (savedBackend.includes("localhost") || savedBackend.includes("127.0.0.1") || savedBackend.startsWith("http:"))) {
+// If running on a cloud domain or anywhere outside localhost, clear old localhost storage
+const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "";
+if (!isLocalhost && savedBackend && (savedBackend.includes("localhost") || savedBackend.includes("127.0.0.1"))) {
   localStorage.removeItem("lifelink_backend_host");
   savedBackend = null;
 }
@@ -24,8 +25,10 @@ let defaultBase = "http://127.0.0.1:5000";
 if (window.location.protocol.startsWith("http")) {
   const p = window.location.port;
   if (!p || p === "80" || p === "443" || p === "5000") {
-    defaultBase = window.location.origin;
+    // Relative path: perfect for deployed sites (avoids protocol, port, or mixed-content mismatches)
+    defaultBase = "";
   } else {
+    // VS Code Live Server on a custom port like 5500: connect to local Flask backend on 5000
     defaultBase = `${window.location.protocol}//${window.location.hostname}:5000`;
   }
 }
@@ -404,16 +407,19 @@ async function fetchDonors() {
     const data = await res.json();
     currentDonors = Array.isArray(data) ? data : (data.donors || []);
 
-    setApiStatus(true);
-    document.getElementById("kpiVal1").textContent = currentDonors.length;
-    renderDonors(currentDonors);
-    updateMapMarkers(currentDonors, currentRequests, currentRole === "hospital");
+    try {
+      const kpi1 = document.getElementById("kpiVal1");
+      if (kpi1) kpi1.textContent = currentDonors.length;
+      renderDonors(currentDonors);
+      updateMapMarkers(currentDonors, currentRequests, currentRole === "hospital");
+    } catch (renderErr) {
+      console.warn("Donor render warning:", renderErr);
+    }
   } catch (err) {
     console.error("Fetch donors error:", err);
-    setApiStatus(false);
     const list = document.getElementById("donorsList");
     if (list) {
-      list.innerHTML = `<p class="empty-state">Unable to load donors. Make sure backend is running at ${API_BASE}.</p>`;
+      list.innerHTML = `<p class="empty-state">Unable to load donors. Make sure backend is running.</p>`;
     }
   }
 }
@@ -425,35 +431,37 @@ async function fetchRequests() {
     const data = await res.json();
     currentRequests = Array.isArray(data) ? data : (data.requests || []);
 
-    setApiStatus(true);
-    const openCount = currentRequests.filter((r) => String(r.status || "open").toLowerCase() === "open").length;
-    const kpi2El = document.getElementById("kpiVal2");
-    if (kpi2El) kpi2El.textContent = openCount;
+    try {
+      const openCount = currentRequests.filter((r) => String(r.status || "open").toLowerCase() === "open").length;
+      const kpi2El = document.getElementById("kpiVal2");
+      if (kpi2El) kpi2El.textContent = openCount;
 
-    // Update 'Demands Matching My Blood' count for the logged-in donor
-    const myBlood = getMyDonorBloodGroup();
-    const kpiMatchingEl = document.getElementById("kpiValMatchingDemands");
-    const kpiMatchingLbl = document.getElementById("kpiLblMatchingDemands");
-    if (kpiMatchingEl) {
-      if (myBlood) {
-        const allowed = CAN_DONATE_TO[myBlood] || [myBlood];
-        const matchCount = currentRequests.filter(
-          (r) => String(r.status || "open").toLowerCase() === "open" && allowed.includes((r.blood_group || "").toUpperCase())
-        ).length;
-        kpiMatchingEl.textContent = matchCount;
-        if (kpiMatchingLbl) kpiMatchingLbl.textContent = `Demands Matching (${myBlood})`;
-      } else {
-        kpiMatchingEl.textContent = openCount;
-        if (kpiMatchingLbl) kpiMatchingLbl.textContent = "Open Emergency Demands";
+      // Update 'Demands Matching My Blood' count for the logged-in donor
+      const myBlood = getMyDonorBloodGroup();
+      const kpiMatchingEl = document.getElementById("kpiValMatchingDemands");
+      const kpiMatchingLbl = document.getElementById("kpiLblMatchingDemands");
+      if (kpiMatchingEl) {
+        if (myBlood) {
+          const allowed = CAN_DONATE_TO[myBlood] || [myBlood];
+          const matchCount = currentRequests.filter(
+            (r) => String(r.status || "open").toLowerCase() === "open" && allowed.includes((r.blood_group || "").toUpperCase())
+          ).length;
+          kpiMatchingEl.textContent = matchCount;
+          if (kpiMatchingLbl) kpiMatchingLbl.textContent = `Demands Matching (${myBlood})`;
+        } else {
+          kpiMatchingEl.textContent = openCount;
+          if (kpiMatchingLbl) kpiMatchingLbl.textContent = "Open Emergency Demands";
+        }
       }
-    }
 
-    renderRequests(currentRequests);
-    renderDashboardRequests(currentRequests);
-    updateMapMarkers(currentDonors, currentRequests, currentRole === "hospital");
+      renderRequests(currentRequests);
+      renderDashboardRequests(currentRequests);
+      updateMapMarkers(currentDonors, currentRequests, currentRole === "hospital");
+    } catch (renderErr) {
+      console.warn("Requests render warning:", renderErr);
+    }
   } catch (err) {
     console.error("Fetch requests error:", err);
-    setApiStatus(false);
   }
 }
 
@@ -1173,6 +1181,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const r = await fetch(`${API_BASE}/api/health`);
       if (r.ok) {
         setApiStatus(true);
+        // Periodic keep-alive check every 15 seconds so connection remains active
+        setTimeout(verifyHealth, 15000);
       } else {
         setApiStatus(false);
         setTimeout(verifyHealth, 4000);
