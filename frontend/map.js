@@ -202,10 +202,10 @@ function injectMapStyles() {
 
 /**
  * Create a modern blood-group pill marker icon.
- * - 'user': Blue glowing pin with 👤 YOU and blue pulse
- * - 'request': Red emergency pin with 🚨 NEED and alert pulse
- * - 'matched': Gold hero pin with ⭐ READY and golden halo
- * - 'donor': Green pin with 🩸 DONOR
+ * - 'user': Blue glowing pin with YOU and blue pulse
+ * - 'request': Red emergency pin with NEED and alert pulse
+ * - 'matched': Gold hero pin with READY and golden halo
+ * - 'donor': Green pin with blood group
  */
 function createBloodPinIcon(type, bloodGroup, customText = null) {
   let pulseHtml = "";
@@ -213,19 +213,19 @@ function createBloodPinIcon(type, bloodGroup, customText = null) {
 
   if (type === "user") {
     pulseHtml = '<span class="user-pulse-ring"></span>';
-    label = '<span>👤</span> <span>YOU</span>';
+    label = '<span>YOU</span>';
   } else if (type === "matched") {
     pulseHtml = '<span class="gold-pulse-ring"></span>';
     const bg = escapeHtml(bloodGroup || "READY");
-    label = `<span>⭐</span> <span>${bg} READY</span>`;
+    label = `<span>${bg} READY</span>`;
   } else if (type === "request") {
     pulseHtml = '<span class="lifeline-pulse-ring"></span>';
     const bg = escapeHtml(bloodGroup || "SOS");
-    label = `<span>🚨</span> <span>${bg} NEED</span>`;
+    label = `<span>${bg} NEED</span>`;
   } else {
     // Regular donor
     const bg = escapeHtml(bloodGroup || "DONOR");
-    label = `<span>🩸</span> <span>${bg}</span>`;
+    label = `<span>${bg}</span>`;
   }
 
   if (customText) {
@@ -315,10 +315,10 @@ function initMap() {
     mapOverlayEl = document.createElement("div");
     mapOverlayEl.className = "lifeline-map-hud";
     mapOverlayEl.innerHTML = `
-      <span class="hud-item"><span class="hud-dot user"></span> 👤 You</span>
-      <span class="hud-item"><span class="hud-dot request"></span> 🚨 Needs Blood</span>
-      <span class="hud-item"><span class="hud-dot matched"></span> ⭐ Ready to Donate</span>
-      <span class="hud-item"><span class="hud-dot donor"></span> 🩸 Donor</span>
+      <span class="hud-item"><span class="hud-dot user"></span> You</span>
+      <span class="hud-item"><span class="hud-dot request"></span> Needs Blood</span>
+      <span class="hud-item"><span class="hud-dot matched"></span> Ready to Donate</span>
+      <span class="hud-item"><span class="hud-dot donor"></span> Donors</span>
       <span class="hud-sep">|</span>
       <span id="hudCounts">0 Donors · 0 SOS</span>
     `;
@@ -379,10 +379,10 @@ function updateMapMarkers(donors, requests, isHospitalView = false, activeUser =
     const userMarker = L.marker([uLat, uLng], { icon: userIcon, zIndexOffset: 1500 });
     userMarker.bindPopup(`
       <div class="lifeline-popup">
-        <span class="lifeline-popup-badge user">👤 YOUR LOCATION</span><br/>
+        <span class="lifeline-popup-badge user">YOUR LOCATION</span><br/>
         <strong>${escapeHtml(activeUser.name || "You")}</strong><br/>
         <span>${escapeHtml(activeUser.info || "Active LifeLink Member")}</span><br/>
-        <small style="color:#64748b;">(Special Detected User Pin)</small>
+        <small style="color:#64748b;">(Detected Area)</small>
       </div>
     `);
     if (userLayer) userMarker.addTo(userLayer);
@@ -417,7 +417,7 @@ function updateMapMarkers(donors, requests, isHospitalView = false, activeUser =
       const marker = L.marker([lat, lng], { icon, zIndexOffset: 1200 });
       marker.bindPopup(`
         <div class="lifeline-popup">
-          <span class="lifeline-popup-badge matched">⭐ HERO DONOR READY</span><br/>
+          <span class="lifeline-popup-badge matched">HERO DONOR READY</span><br/>
           <strong>${escapeHtml(donor.name || "Hero Donor")}</strong><br/>
           <span style="color:#d97706;font-weight:700;">Ready to Donate Blood to You!</span><br/>
           Area: ${escapeHtml(donor.area || "Nearby Area")}<br/>
@@ -469,7 +469,7 @@ function updateMapMarkers(donors, requests, isHospitalView = false, activeUser =
     const marker = L.marker([lat, lng], { icon, zIndexOffset: 1100 });
     marker.bindPopup(`
       <div class="lifeline-popup">
-        <span class="lifeline-popup-badge request">🚨 EMERGENCY NEED · ${escapeHtml(req.blood_group || "N/A")}</span><br/>
+        <span class="lifeline-popup-badge request">EMERGENCY NEED · ${escapeHtml(req.blood_group || "N/A")}</span><br/>
         <strong>${escapeHtml(req.hospital || "Hospital / Patient")}</strong><br/>
         Area: ${escapeHtml(req.area || "Nearby Area")}<br/>
         Units Needed: <strong>${escapeHtml(String(req.units_needed || 1))} Unit(s)</strong><br/>
