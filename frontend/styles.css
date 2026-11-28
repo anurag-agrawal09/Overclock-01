@@ -1651,3 +1651,49 @@ body {
 
 .ai-check-icon.pass { color: #16a34a; }
 .ai-check-icon.fail { color: #dc2626; }
+
+/* 1-Click AI Test Sample Buttons */
+.sample-pills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.btn-sample-doc {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #1e293b;
+  transition: all 0.15s ease;
+}
+
+.btn-sample-doc:hover {
+  background: #e2e8f0;
+  transform: translateY(-1px);
+}
+
+.btn-sample-doc.fake {
+  border-color: #fca5a5;
+  color: #b91c1c;
+  background: #fff1f2;
+}
+
+.btn-sample-doc.fake:hover {
+  background: #fee2e2;
+}
+
+.btn-sample-doc.warn {
+  border-color: #fde047;
+  color: #b45309;
+  background: #fefce8;
+}
+
+.btn-sample-doc.warn:hover {
+  background: #fef08a;
+}

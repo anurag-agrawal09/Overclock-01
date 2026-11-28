@@ -1,0 +1,64 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 2237 >>
+stream
+BT /F1 11 Tf 40 780 Td 15 TL
+(=========================================================================) '
+(              APOLLO DIAGNOSTICS & CLINICAL REFERENCE LAB) '
+(       \(NABL Accredited Laboratory · ISO 15189 Certified · Reg: MC-4892\)) '
+(=========================================================================) '
+(Patient Name: Aarav Sharma                  Age / Gender: 24 Yrs / Male) '
+(Referred By: Dr. R. K. Joshi \(AIIMS\)         Sample Collected: 27-Nov-2026) '
+(Barcode ID: 894109283921                     Reporting Date:   28-Nov-2026) '
+(-------------------------------------------------------------------------) '
+(                       COMPLETE BLOOD COUNT \(CBC\) & SEROLOGY) '
+(-------------------------------------------------------------------------) '
+(TEST DESCRIPTION                 OBSERVED VALUE      REFERENCE RANGE) '
+(-------------------------------------------------------------------------) '
+(Hemoglobin \(Hb\)                  14.5 g/dL           12.5 - 17.5 g/dL \(NORMAL\)) '
+(Blood Group & Rh Typing          O Positive \(O+\)     ABO/Rh Blood Grouping) '
+(Packed Cell Volume \(PCV\)         42.8 %              38.0 - 50.0 %) '
+(Total Leucocyte Count \(WBC\)      7,400 /cumm         4,000 - 11,000 /cumm) '
+(Platelet Count                   260,000 /cumm       150,000 - 450,000 /cumm) '
+(-------------------------------------------------------------------------) '
+(                    MANDATORY DONOR INFECTIOUS SCREENING) '
+(-------------------------------------------------------------------------) '
+(HIV 1 & 2 Antibody \(4th Gen\)     NON-REACTIVE        Negative / Non-Reactive) '
+(HBsAg \(Hepatitis B Surface\)      NON-REACTIVE        Negative / Non-Reactive) '
+(HCV \(Hepatitis C Antibody\)       NON-REACTIVE        Negative / Non-Reactive) '
+(VDRL / Syphilis Rapid Test       NON-REACTIVE        Negative / Non-Reactive) '
+(Malarial Parasite \(Smear\)        NOT SEEN            Negative) '
+(-------------------------------------------------------------------------) '
+(CLINICAL REMARKS: Donor parameters meet all DGHS & WHO safety standards.) '
+(Verified & Digitally Signed By:) '
+(Dr. Arvind Saxena, MD \(Pathology\)) '
+(Chief Consultant Pathologist · NMC Reg: 48921) '
+ET
+
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000002530 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+2600
+%%EOF

@@ -268,6 +268,14 @@
                   <input id="regDonorReport" type="file" accept=".pdf,.jpg,.jpeg,.png" required />
                   <small id="regDonorReportNotice" style="color: #64748b; font-size: 0.78rem; display: block; margin-top: 3px;">Encrypted at rest with AES-256 in Amazon S3 (ap-south-1 Mumbai).</small>
 
+                  <!-- 1-Click AI Test Samples -->
+                  <div class="sample-pills-row">
+                    <span style="font-size: 11px; color: #64748b; font-weight: 600;">Test Samples:</span>
+                    <button type="button" class="btn-sample-doc" id="btnTestOfficialDoc">Official NABL Report (98%)</button>
+                    <button type="button" class="btn-sample-doc fake" id="btnTestFakeDoc">Fake Receipt (50%)</button>
+                    <button type="button" class="btn-sample-doc warn" id="btnTestLowHbDoc">Low-Hb Report (85%)</button>
+                  </div>
+
                   <!-- AI Document Authenticity Scanning Status & Card -->
                   <div id="aiScanLoader" class="ai-scan-loader hidden">
                     <div class="ai-scan-spinner"></div>

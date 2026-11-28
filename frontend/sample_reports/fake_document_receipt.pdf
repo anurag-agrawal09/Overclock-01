@@ -1,0 +1,51 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 1203 >>
+stream
+BT /F1 11 Tf 40 780 Td 15 TL
+(=========================================================================) '
+(                 DOMINOS PIZZA RETAIL OUTLET #4812) '
+(                      TAX INVOICE / CASH MEMO) '
+(=========================================================================) '
+(Order No: 48921                            Table / Seat: Takeaway #14) '
+(Cashier: Rahul M.                          Date: 27-Nov-2026 19:42) '
+(-------------------------------------------------------------------------) '
+(ITEM DESCRIPTION                 QTY        RATE       AMOUNT \(INR\)) '
+(-------------------------------------------------------------------------) '
+(1. Farmhouse Medium Crust Pizza  1          399.00     399.00) '
+(2. Cheesy Garlic Bread           1          129.00     129.00) '
+(3. Pepsi 500ml Bottle            2           40.00      80.00) '
+(-------------------------------------------------------------------------) '
+(CGST \(2.5%\): 15.20               SGST \(2.5%\): 15.20) '
+(TOTAL PAID: INR 638.40 \(Paid via UPI / PhonePe\)) '
+(-------------------------------------------------------------------------) '
+(Thank you for dining with us! For feedback visit dominos.co.in) '
+ET
+
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000001496 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1566
+%%EOF
