@@ -24,6 +24,7 @@ def init_db():
     with open(SCHEMA_PATH, "r", encoding="utf-8") as f:
         schema_sql = f.read()
 
+    needs_seed = False
     with _get_connection() as conn:
         conn.executescript(schema_sql)
         # Check and add columns if upgrading existing db
@@ -39,6 +40,25 @@ def init_db():
         for col_name, col_def in migrations:
             if col_name not in existing_cols:
                 conn.execute(f"ALTER TABLE donors ADD COLUMN {col_def}")
+
+        try:
+            donor_count = conn.execute("SELECT COUNT(*) FROM donors").fetchone()[0]
+            if donor_count == 0:
+                needs_seed = True
+        except Exception:
+            needs_seed = False
+
+    if needs_seed:
+        print("[LifeLink] Auto-seeding initial donors and emergency requests for cloud deployment...")
+        try:
+            from database.seed_data import seed
+            seed()
+        except ImportError:
+            try:
+                from seed_data import seed
+                seed()
+            except Exception as e:
+                print(f"[Auto-seed notice]: {e}")
 
 
 def add_donor(data):

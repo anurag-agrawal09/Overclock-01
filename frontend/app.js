@@ -642,10 +642,12 @@ function renderDashboardRequests(requests) {
 
 function renderRequests(requests) {
   const list = document.getElementById("requestsList");
-  if (!requests.length) {
+  if (!list) return;
+  if (!requests || !requests.length) {
     list.innerHTML = `<p class="empty-state">No emergency requests posted yet.</p>`;
     return;
   }
+  const myBlood = getMyDonorBloodGroup();
 
   list.innerHTML = requests
     .map((req, index) => {
@@ -1125,14 +1127,23 @@ document.addEventListener("DOMContentLoaded", () => {
         body: JSON.stringify(payload)
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const savedReq = await res.json();
 
       showToast("Emergency request broadcasted & compatible donors alerted!");
       e.target.reset();
       document.getElementById("reqUnits").value = "1";
+
+      // Instantly reflect the added SOS request in local arrays
+      if (savedReq && (savedReq.id || savedReq.blood_group)) {
+        currentRequests = [savedReq, ...currentRequests.filter((r) => r.id !== savedReq.id)];
+        renderRequests(currentRequests);
+        renderDashboardRequests(currentRequests);
+      }
+
       await Promise.all([fetchRequests(), fetchAlerts()]);
       navigateTab("requests");
     } catch (err) {
-      console.error(err);
+      console.error("Post request error:", err);
       showToast("Could not post request. Check backend connection.");
     }
   });
