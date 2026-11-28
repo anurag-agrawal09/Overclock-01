@@ -1498,3 +1498,156 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* AI Medical Document Authenticity Panel */
+.ai-scan-loader {
+  background: #f0f9ff;
+  border: 1px dashed #38bdf8;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #0369a1;
+  font-size: 12px;
+}
+
+.ai-scan-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid #bae6fd;
+  border-top-color: #0284c7;
+  border-radius: 50%;
+  animation: ai-spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes ai-spin {
+  to { transform: rotate(360deg); }
+}
+
+.ai-doc-card {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ai-doc-card.genuine {
+  border-color: #86efac;
+  background: #fcfdfc;
+}
+
+.ai-doc-card.warning {
+  border-color: #fde047;
+  background: #fffdfa;
+}
+
+.ai-doc-card.danger {
+  border-color: #fca5a5;
+  background: #fffafa;
+}
+
+.ai-doc-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ai-doc-badge-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ai-score-pill {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.ai-score-pill.low {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.ai-verdict-pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.ai-doc-summary {
+  font-size: 12px;
+  line-height: 1.45;
+  color: #334155;
+  margin: 0;
+}
+
+.ai-doc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.ai-stat-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ai-stat-box small {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.ai-stat-box strong {
+  font-size: 12px;
+  color: #0f172a;
+  word-break: break-word;
+}
+
+.ai-checks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 8px;
+}
+
+.ai-check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 11px;
+  color: #475569;
+}
+
+.ai-check-icon {
+  font-weight: 800;
+  font-size: 11px;
+}
+
+.ai-check-icon.pass { color: #16a34a; }
+.ai-check-icon.fail { color: #dc2626; }

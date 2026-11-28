@@ -11,6 +11,7 @@ if ROOT_DIR not in sys.path:
 
 from backend.notifications import generate_alerts_for_request
 from backend.aadhaar_service import request_aadhaar_otp, verify_aadhaar_otp, validate_verhoeff
+from backend.ai_document_verifier import verify_blood_report
 
 # Try importing Member 3's database functions.
 # If Member 3 hasn't merged yet, use safe in-memory fallback stubs.
@@ -210,6 +211,24 @@ def aadhaar_verify_otp():
     res = verify_aadhaar_otp(session_id, otp)
     status_code = 200 if res.get("success") else 400
     return jsonify(res), status_code
+
+@app.route("/api/ai/verify-document", methods=["POST"])
+def ai_verify_document():
+    """AI-powered Blood Test Document Authenticity & Clinical Verification."""
+    expected_blood_group = request.form.get("blood_group") or ""
+    if "file" in request.files:
+        file_obj = request.files["file"]
+        filename = file_obj.filename or "blood_test_report.pdf"
+        file_bytes = file_obj.read()
+    else:
+        data = request.get_json(silent=True) or {}
+        filename = data.get("filename", "blood_test_report.pdf")
+        content = data.get("content", "")
+        expected_blood_group = data.get("blood_group", expected_blood_group)
+        file_bytes = content.encode("utf-8") if isinstance(content, str) else b""
+
+    result = verify_blood_report(file_bytes, filename, expected_blood_group)
+    return jsonify(result), 200
 
 @app.route("/api/donors", methods=["POST"])
 def register_donor():

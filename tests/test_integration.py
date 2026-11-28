@@ -15,7 +15,7 @@ def run_all_tests():
     print(" INTEGRATION TEST SUITE: BLOOD DONOR FINDER & REQUEST BOARD")
     print("=" * 65)
     passed = 0
-    total = 9
+    total = 10
 
     # Use Flask's in-process test_client (zero network/socket permissions required)
     client = app.test_client()
@@ -295,6 +295,40 @@ def run_all_tests():
         passed += 1
     except Exception as e:
         print(f"[FAIL] Test 9: Aadhaar age verification failed: {e}")
+
+    # -------------------------------------------------------------
+    # TEST 10: AI Blood Test Document Authenticity & Clinical Verifier
+    # -------------------------------------------------------------
+    try:
+        # A. Genuine accredited blood test report
+        genuine_payload = {
+            "filename": "apollo_cbc_blood_report.pdf",
+            "content": "%PDF-1.4 Apollo Diagnostics NABL Accredited ISO 15189 Complete Blood Count Hemoglobin: 14.5 g/dl Blood Group: O+ HIV Non-Reactive Dr. Arvind Saxena Pathologist",
+            "blood_group": "O+"
+        }
+        res_g = client.post("/api/ai/verify-document", json=genuine_payload)
+        assert res_g.status_code == 200
+        data_g = res_g.get_json()
+        assert data_g.get("is_genuine") is True
+        assert data_g.get("authenticity_score") >= 75
+        assert data_g.get("verdict") == "GENUINE_ELIGIBLE"
+        assert "Apollo Diagnostics" in data_g.get("extracted_data", {}).get("lab_name", "")
+
+        # B. Non-medical / Suspicious document
+        fake_payload = {
+            "filename": "movie_poster.jpg",
+            "content": "random cinema ticket download receipt non-medical file"
+        }
+        res_f = client.post("/api/ai/verify-document", json=fake_payload)
+        assert res_f.status_code == 200
+        data_f = res_f.get_json()
+        assert data_f.get("authenticity_score") < 60
+        assert data_f.get("verdict") in ("SUSPICIOUS_UNVERIFIED", "FRAUDULENT_OR_EMPTY")
+
+        print("[PASS] Test 10: AI Medical Document Authenticity & Clinical Verification validated!")
+        passed += 1
+    except Exception as e:
+        print(f"[FAIL] Test 10: AI Document Verification failed: {e}")
 
     print("=" * 65)
     print(f" RESULT: {passed}/{total} tests passed.")

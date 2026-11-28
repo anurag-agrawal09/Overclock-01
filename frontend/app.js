@@ -1137,6 +1137,101 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // -----------------------------------------------------------------
+  // AI Blood Test Document Authenticity Scanner
+  // -----------------------------------------------------------------
+  let lastAiVerification = null;
+  const reportFileInput = document.getElementById("regDonorReport");
+  const aiScanLoader = document.getElementById("aiScanLoader");
+  const aiDocResultCard = document.getElementById("aiDocResultCard");
+
+  if (reportFileInput) {
+    reportFileInput.addEventListener("change", async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) {
+        if (aiDocResultCard) aiDocResultCard.classList.add("hidden");
+        return;
+      }
+
+      if (aiScanLoader) aiScanLoader.classList.remove("hidden");
+      if (aiDocResultCard) aiDocResultCard.classList.add("hidden");
+
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const selBlood = (document.getElementById("regDonorBlood")?.value || "").trim();
+        if (selBlood) formData.append("blood_group", selBlood);
+
+        const res = await fetch(`${API_BASE}/api/ai/verify-document`, {
+          method: "POST",
+          body: formData
+        });
+        const data = await res.json();
+        lastAiVerification = data;
+
+        if (aiScanLoader) aiScanLoader.classList.add("hidden");
+
+        if (aiDocResultCard) {
+          aiDocResultCard.classList.remove("hidden", "genuine", "warning", "danger");
+
+          const scoreBadge = document.getElementById("aiScoreBadge");
+          const verdictBadge = document.getElementById("aiVerdictBadge");
+          const summaryText = document.getElementById("aiSummaryText");
+          const labName = document.getElementById("aiLabName");
+          const hbText = document.getElementById("aiHemoglobin");
+          const infText = document.getElementById("aiInfection");
+          const pathText = document.getElementById("aiPathologist");
+          const dateText = document.getElementById("aiReportDate");
+          const checksList = document.getElementById("aiChecksList");
+
+          const score = data.authenticity_score || 0;
+          if (scoreBadge) {
+            scoreBadge.textContent = `${score}% Genuine`;
+            scoreBadge.className = score >= 75 ? "ai-score-pill" : "ai-score-pill low";
+          }
+          if (verdictBadge) {
+            verdictBadge.textContent = data.status_badge || "Analysis Complete";
+          }
+          if (summaryText) summaryText.textContent = data.summary || "";
+
+          const ext = data.extracted_data || {};
+          if (labName) labName.textContent = ext.lab_name || "Certified Lab";
+          if (hbText) hbText.textContent = ext.hemoglobin || "Normal";
+          if (infText) infText.textContent = ext.infection_screen || "Non-Reactive";
+          if (pathText) pathText.textContent = ext.pathologist || "Authorized Pathologist";
+          if (dateText) dateText.textContent = `Date: ${ext.report_date || "Today"}`;
+
+          if (checksList && data.checks) {
+            checksList.innerHTML = data.checks.map((c) => `
+              <div class="ai-check-item">
+                <span class="ai-check-icon ${c.passed ? 'pass' : 'fail'}">${c.passed ? '✓' : '✗'}</span>
+                <div><strong>${safeText(c.name)}:</strong> ${safeText(c.details)}</div>
+              </div>
+            `).join("");
+          }
+
+          if (data.verdict === "GENUINE_ELIGIBLE") {
+            aiDocResultCard.classList.add("genuine");
+            showToast(`AI Verified: Report is Authentic (${score}%) & Eligible!`);
+            // Auto sync blood group if detected and not set
+            if (ext.blood_group && !document.getElementById("regDonorBlood").value) {
+              document.getElementById("regDonorBlood").value = ext.blood_group;
+            }
+          } else if (data.verdict === "GENUINE_INELIGIBLE") {
+            aiDocResultCard.classList.add("warning");
+            showToast("Report Authentic, but clinical parameters outside safe donation range.");
+          } else {
+            aiDocResultCard.classList.add("danger");
+            showToast("Warning: Document does not match authentic clinical lab patterns.");
+          }
+        }
+      } catch (err) {
+        console.error("AI Document Scanner error:", err);
+        if (aiScanLoader) aiScanLoader.classList.add("hidden");
+      }
+    });
+  }
+
   // Donor Registration -> POST /api/donors
   document.getElementById("donorRegForm").addEventListener("submit", async (e) => {
     e.preventDefault();

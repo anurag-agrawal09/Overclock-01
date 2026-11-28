@@ -267,6 +267,48 @@
                   </div>
                   <input id="regDonorReport" type="file" accept=".pdf,.jpg,.jpeg,.png" required />
                   <small id="regDonorReportNotice" style="color: #64748b; font-size: 0.78rem; display: block; margin-top: 3px;">Encrypted at rest with AES-256 in Amazon S3 (ap-south-1 Mumbai).</small>
+
+                  <!-- AI Document Authenticity Scanning Status & Card -->
+                  <div id="aiScanLoader" class="ai-scan-loader hidden">
+                    <div class="ai-scan-spinner"></div>
+                    <div>
+                      <strong>AI Medical Authenticity Engine Scanning...</strong>
+                      <small style="display: block; color: #64748b;">Checking NABL accreditation, hemoglobin level, pathologist signature &amp; forensic integrity</small>
+                    </div>
+                  </div>
+
+                  <div id="aiDocResultCard" class="ai-doc-card hidden">
+                    <div class="ai-doc-top">
+                      <div class="ai-doc-badge-group">
+                        <span id="aiScoreBadge" class="ai-score-pill">96% Genuine</span>
+                        <span id="aiVerdictBadge" class="ai-verdict-pill">NABL Verified</span>
+                      </div>
+                      <small id="aiReportDate" style="color: #64748b; font-weight: 600;"></small>
+                    </div>
+                    
+                    <p id="aiSummaryText" class="ai-doc-summary"></p>
+
+                    <div class="ai-doc-grid">
+                      <div class="ai-stat-box">
+                        <small>Laboratory</small>
+                        <strong id="aiLabName">--</strong>
+                      </div>
+                      <div class="ai-stat-box">
+                        <small>Hemoglobin (Hb)</small>
+                        <strong id="aiHemoglobin">--</strong>
+                      </div>
+                      <div class="ai-stat-box">
+                        <small>Infection Markers</small>
+                        <strong id="aiInfection">--</strong>
+                      </div>
+                      <div class="ai-stat-box">
+                        <small>Pathologist Auth</small>
+                        <strong id="aiPathologist">--</strong>
+                      </div>
+                    </div>
+
+                    <div id="aiChecksList" class="ai-checks-list"></div>
+                  </div>
                 </div>
               </div>
             </div>
