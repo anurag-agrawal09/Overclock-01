@@ -377,9 +377,15 @@ function navigateTab(tabId) {
   if (tabId === "map" && mapEl) {
     document.getElementById("mapSlotFull").appendChild(mapEl);
     refreshMapSize();
+    if (typeof updateMapMarkers === "function") {
+      updateMapMarkers(currentDonors, currentRequests, currentRole === "hospital", currentUser, currentAlerts);
+    }
   } else if (tabId === "dashboard" && mapEl) {
     document.getElementById("mapSlotDashboard").appendChild(mapEl);
     refreshMapSize();
+    if (typeof updateMapMarkers === "function") {
+      updateMapMarkers(currentDonors, currentRequests, currentRole === "hospital", currentUser, currentAlerts);
+    }
   }
 
   document.querySelector(".sidebar").classList.remove("open");
@@ -411,7 +417,7 @@ async function fetchDonors() {
       const kpi1 = document.getElementById("kpiVal1");
       if (kpi1) kpi1.textContent = currentDonors.length;
       renderDonors(currentDonors);
-      updateMapMarkers(currentDonors, currentRequests, currentRole === "hospital");
+      updateMapMarkers(currentDonors, currentRequests, currentRole === "hospital", currentUser, currentAlerts);
     } catch (renderErr) {
       console.warn("Donor render warning:", renderErr);
     }
@@ -456,7 +462,7 @@ async function fetchRequests() {
 
       renderRequests(currentRequests);
       renderDashboardRequests(currentRequests);
-      updateMapMarkers(currentDonors, currentRequests, currentRole === "hospital");
+      updateMapMarkers(currentDonors, currentRequests, currentRole === "hospital", currentUser, currentAlerts);
     } catch (renderErr) {
       console.warn("Requests render warning:", renderErr);
     }
@@ -476,6 +482,9 @@ async function fetchAlerts() {
     document.getElementById("bellCount").textContent = currentAlerts.length;
     renderAlerts(currentAlerts);
     renderSidebarForRole();
+    if (typeof updateMapMarkers === "function") {
+      updateMapMarkers(currentDonors, currentRequests, currentRole === "hospital", currentUser, currentAlerts);
+    }
   } catch (err) {
     console.error("Fetch alerts error:", err);
   }
