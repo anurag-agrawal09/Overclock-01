@@ -13,8 +13,16 @@ if (urlParamHost) {
   localStorage.setItem("lifelink_backend_host", urlParamHost);
 }
 const savedBackend = localStorage.getItem("lifelink_backend_host");
-const currentHost = window.location.hostname && window.location.hostname !== "" ? window.location.hostname : "127.0.0.1";
-const API_BASE = savedBackend || (window.location.protocol.startsWith("http") ? `http://${currentHost}:5000` : "http://127.0.0.1:5000");
+let defaultBase = "http://127.0.0.1:5000";
+if (window.location.protocol.startsWith("http")) {
+  const p = window.location.port;
+  if (!p || p === "80" || p === "443" || p === "5000") {
+    defaultBase = window.location.origin;
+  } else {
+    defaultBase = `${window.location.protocol}//${window.location.hostname}:5000`;
+  }
+}
+const API_BASE = savedBackend || defaultBase;
 
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
 const SESSION_KEY = "lifeline_session_v1";

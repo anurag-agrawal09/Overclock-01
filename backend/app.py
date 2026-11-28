@@ -1,7 +1,7 @@
 import os
 import sys
 from datetime import datetime, timedelta
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
 # Add root folder to sys.path so we can import from database or backend
@@ -128,8 +128,28 @@ except ImportError:
         def dispatch_emergency_sms(*a, **kw):
             return {"provider": "AWS SNS", "status": "DELIVERED"}
 
-app = Flask(__name__)
+FRONTEND_DIR = os.path.join(ROOT_DIR, "frontend")
+app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="")
 CORS(app)
+
+# Ensure database is initialized on WSGI/Gunicorn import
+try:
+    init_storage()
+except Exception as e:
+    print(f"[Notice] Database auto-init: {e}")
+
+@app.route("/")
+def serve_index():
+    """Serves the LifeLink unified single-page frontend."""
+    return send_from_directory(FRONTEND_DIR, "index.html")
+
+@app.route("/<path:path>")
+def serve_static(path):
+    """Serves static files (styles.css, app.js, map.js) or index fallback."""
+    full_path = os.path.join(FRONTEND_DIR, path)
+    if os.path.exists(full_path) and os.path.isfile(full_path):
+        return send_from_directory(FRONTEND_DIR, path)
+    return send_from_directory(FRONTEND_DIR, "index.html")
 
 @app.route("/api/health", methods=["GET"])
 def health():
@@ -444,5 +464,6 @@ if __name__ == "__main__":
         init_storage()
     except Exception as e:
         print(f"[Warning] Could not initialize DB storage: {e}")
-    print("Starting Blood Donor Finder backend on http://0.0.0.0:5000 (accessible locally and across team Wi-Fi) ...")
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    print(f"Starting Blood Donor Finder backend on http://0.0.0.0:{port} ...")
+    app.run(host="0.0.0.0", port=port, debug=True)
