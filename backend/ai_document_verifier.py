@@ -15,7 +15,12 @@ import re
 import zlib
 import datetime
 from io import BytesIO
-from PIL import Image
+
+try:
+    from PIL import Image
+    HAS_PILLOW = True
+except Exception:
+    HAS_PILLOW = False
 
 # -------------------------------------------------------------
 # Medical Standards & Thresholds (WHO / DGHS / NACO India)
@@ -64,6 +69,13 @@ def extract_text_from_pdf_bytes(pdf_bytes: bytes) -> str:
 def inspect_image_file(image_bytes: bytes, filename: str) -> dict:
     """Analyze image dimensions, format, and forensic properties."""
     meta = {"format": "UNKNOWN", "width": 0, "height": 0, "is_valid_image": False}
+    if not HAS_PILLOW:
+        if image_bytes.startswith(b"\xFF\xD8\xFF"):
+            meta.update({"format": "JPEG", "is_valid_image": True})
+        elif image_bytes.startswith(b"\x89PNG"):
+            meta.update({"format": "PNG", "is_valid_image": True})
+        return meta
+
     try:
         img = Image.open(BytesIO(image_bytes))
         meta["format"] = img.format or "IMAGE"
